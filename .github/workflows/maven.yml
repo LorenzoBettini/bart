@@ -3,29 +3,46 @@ name: Build
 on:
   push:
     paths-ignore:
-     - '**.md'
+      - "**.md"
   pull_request:
     paths-ignore:
-     - '**.md'
+      - "**.md"
 
 jobs:
   build:
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     strategy:
       matrix:
-        os: ['ubuntu-latest'] # , 'macos-latest', 'windows-latest']
+        os: ["ubuntu-latest"] # , 'macos-latest', 'windows-latest']
       fail-fast: false
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: 'Check out repository'
+      - name: "Check out repository"
         uses: actions/checkout@v4
+        with:
+          # Shallow clones should be disabled for a better relevancy of SonarQube analysis
+          fetch-depth: 0
+      # execute sonar:sonar only for internal PRs
+      - name: Set Maven Additional Goals
+        run: |
+          echo "SONARGOAL=sonar:sonar" >> $GITHUB_ENV
+        if: ${{ env.SONAR_TOKEN }}
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2
+            ~/.sonar/cache
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.yml') }}
+          restore-keys: ${{ runner.os }}-m2-
 
-      - name: 'Set up Java'
+      - name: "Set up Java"
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: 'temurin'
-          cache: 'maven'
+          distribution: "temurin"
 
-      - name: 'Build and test'
-        run: mvn verify
+      - name: "Build, test, code quality and coverage"
+        run: mvn verify -Pjacoco $SONARGOAL -Dsonar.projectKey=LorenzoBettini_bart
