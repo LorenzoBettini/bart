@@ -1,7 +1,7 @@
 package colpo.core;
 
 /**
- * A sealed interface representing a composite exchange in the Colpo system.
+ * A sealed interface representing a composite exchange in the Bart system.
  *
  * @author Lorenzo Bettini
  */
