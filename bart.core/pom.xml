@@ -9,9 +9,9 @@
 		<artifactId>colpo.parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>colpo.core</artifactId>
+	<artifactId>bart.core</artifactId>
 
-	<name>colpo.core</name>
+	<name>bart.core</name>
 
 	<dependencies>
 		<dependency>
