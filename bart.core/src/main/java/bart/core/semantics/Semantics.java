@@ -7,15 +7,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import bart.core.AndExchange;
 import bart.core.AttributeMatcher;
 import bart.core.Attributes;
+import bart.core.AttributesResolverImplementation;
 import bart.core.CompositeExchange;
 import bart.core.ContextHandler;
 import bart.core.DefaultRequestComply;
@@ -149,15 +148,7 @@ public class Semantics {
 				return DENIED;
 			}
 			outcome = rule.getCondition().evaluate(
-				name -> Stream.of(
-							request.resource(),
-							contextHandler.ofParty(policyIndex),
-							policies.getByIndex(request.requester().index()).party())
-					.map(attributes -> attributes.name(name))
-					.filter(Objects::nonNull)
-					.findFirst()
-					.orElseThrow(() -> new UndefinedName(name))
-			);
+				new AttributesResolverImplementation(request, contextHandler, policies, policyIndex));
 			trace.add(String.format("%s: condition %s -> %s", traceForRule(policyIndex, ruleIndex), rule.getCondition(), outcome));
 			if (!outcome) {
 				return DENIED;
