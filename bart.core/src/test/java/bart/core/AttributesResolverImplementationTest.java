@@ -30,10 +30,12 @@ class AttributesResolverImplementationTest {
 		);
 
 		// Setup context handler with attributes for different parties
+		// Note: context index is determined by request.from().getIndex() (which is 2)
 		contextHandler = new ContextHandler()
-			.add(0, "context/time", "morning")
-			.add(0, "context/priority", "high")
+			.add(0, "context/other", "value0")
 			.add(1, "context/department", "IT")
+			.add(2, "context/time", "morning")
+			.add(2, "context/priority", "high")
 			.add(2, "context/building", "North");
 
 		// Setup policies with party attributes
@@ -56,8 +58,8 @@ class AttributesResolverImplementationTest {
 			.add(policy1)
 			.add(policy2);
 
-		// Create resolver for policy index 0 (Alice's policy)
-		resolver = new AttributesResolverImplementation(request, contextHandler, policies, 0);
+		// Create resolver - context index determined by request.from().getIndex() (which is 2)
+		resolver = new AttributesResolverImplementation(request, contextHandler, policies);
 	}
 
 	@Test
@@ -96,7 +98,7 @@ class AttributesResolverImplementationTest {
 		// to test resolution priority: resource > context > requester party
 		
 		// Add attribute to context that conflicts with resource
-		contextHandler.add(0, "resource/type", "scanner");
+		contextHandler.add(2, "resource/type", "scanner");
 		
 		// Add attribute to requester's party that conflicts with both
 		var conflictingPolicy = new Policy(
@@ -107,7 +109,7 @@ class AttributesResolverImplementationTest {
 		);
 		
 		var conflictPolicies = new Policies().add(conflictingPolicy);
-		var conflictResolver = new AttributesResolverImplementation(request, contextHandler, conflictPolicies, 0);
+		var conflictResolver = new AttributesResolverImplementation(request, contextHandler, conflictPolicies);
 		
 		// Should return value from resource (highest priority)
 		Object result = conflictResolver.name("resource/type");
@@ -120,7 +122,7 @@ class AttributesResolverImplementationTest {
 		// when resource doesn't have the attribute
 		
 		// Add same attribute to both context and requester party
-		contextHandler.add(0, "common/attribute", "from_context");
+		contextHandler.add(2, "common/attribute", "from_context");
 		
 		var testPolicy = new Policy(
 			new Attributes()
@@ -130,7 +132,7 @@ class AttributesResolverImplementationTest {
 		);
 		
 		var testPolicies = new Policies().add(testPolicy);
-		var testResolver = new AttributesResolverImplementation(request, contextHandler, testPolicies, 0);
+		var testResolver = new AttributesResolverImplementation(request, contextHandler, testPolicies);
 		
 		// Should return value from context handler (higher priority than requester party)
 		Object result = testResolver.name("common/attribute");
@@ -138,17 +140,23 @@ class AttributesResolverImplementationTest {
 	}
 
 	@Test
-	void testDifferentPolicyIndex() throws UndefinedName {
-		// Test resolver with different policy index
-		var resolverForPolicy1 = new AttributesResolverImplementation(request, contextHandler, policies, 1);
+	void testDifferentContextIndex() throws UndefinedName {
+		// Test resolver with different context index by changing request.from()
+		var requestFromIndex0 = new Request(
+			index(1), // requester 
+			new Attributes().add("resource/test", "value"),
+			index(0) // from index 0 - this will be used for context lookup (different from requester)
+		);
 		
-		// Should access context for policy index 1 (adding to party index 1 for policy index 1)
-		contextHandler.add(1, "policy1/context", "value1");
-		Object result = resolverForPolicy1.name("policy1/context");
-		assertEquals("value1", result);
+		var resolverForIndex0 = new AttributesResolverImplementation(requestFromIndex0, contextHandler, policies);
+		
+		// Should access context for index 0 (as specified in request.from())
+		contextHandler.add(0, "policy0/context", "value0");
+		Object result = resolverForIndex0.name("policy0/context");
+		assertEquals("value0", result);
 		
 		// Should still access requester's party (index 1 -> policy index 0)
-		result = resolverForPolicy1.name("name");
+		result = resolverForIndex0.name("name");
 		assertEquals("Alice", result);
 	}
 
@@ -187,7 +195,7 @@ class AttributesResolverImplementationTest {
 		var emptyContextHandler = new ContextHandler();
 		
 		var emptyResolver = new AttributesResolverImplementation(
-			requestWithEmpty, emptyContextHandler, policies, 0);
+			requestWithEmpty, emptyContextHandler, policies);
 		
 		// Should throw UndefinedName when all sources return null
 		assertThatThrownBy(() -> emptyResolver.name("nonexistent"))
@@ -209,7 +217,7 @@ class AttributesResolverImplementationTest {
 			.add(new Policy(new Attributes(), new Rules())); // empty party attributes
 		
 		var emptyResolver = new AttributesResolverImplementation(
-			emptyRequest, emptyContextHandler, emptyPolicies, 0);
+			emptyRequest, emptyContextHandler, emptyPolicies);
 		
 		// Should throw UndefinedName for any attribute
 		assertThatThrownBy(() -> emptyResolver.name("any/attribute"))
@@ -228,7 +236,7 @@ class AttributesResolverImplementationTest {
 		);
 		
 		var resolverForIndex2 = new AttributesResolverImplementation(
-			requestFromIndex2, contextHandler, policies, 0);
+			requestFromIndex2, contextHandler, policies);
 		
 		// Should access policy at index 1 (Bob's policy) for requester index 2
 		Object result = resolverForIndex2.name("department");
@@ -241,8 +249,8 @@ class AttributesResolverImplementationTest {
 		
 		// Setup complex context
 		contextHandler
-			.add(0, "time/current", "10:30")
-			.add(0, "location/floor", "3rd")
+			.add(2, "time/current", "10:30")
+			.add(2, "location/floor", "3rd")
 			.add(1, "user/preferences", "dark_mode");
 		
 		// Test accessing different types of attributes
@@ -267,7 +275,7 @@ class AttributesResolverImplementationTest {
 		);
 		
 		var specialResolver = new AttributesResolverImplementation(
-			specialRequest, contextHandler, policies, 0);
+			specialRequest, contextHandler, policies);
 		
 		// Should handle various attribute name formats
 		assertEquals("empty_key", specialResolver.name(""));

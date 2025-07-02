@@ -148,7 +148,7 @@ public class Semantics {
 				return DENIED;
 			}
 			outcome = rule.getCondition().evaluate(
-				new AttributesResolverImplementation(request, contextHandler, policies, policyIndex));
+				new AttributesResolverImplementation(request, contextHandler, policies));
 			trace.add(String.format("%s: condition %s -> %s", traceForRule(policyIndex, ruleIndex), rule.getCondition(), outcome));
 			if (!outcome) {
 				return DENIED;

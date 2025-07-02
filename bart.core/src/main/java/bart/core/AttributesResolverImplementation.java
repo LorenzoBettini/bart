@@ -16,20 +16,18 @@ public final class AttributesResolverImplementation implements AttributesResolve
 	private Request request;
 	private ContextHandler contextHandler;
 	private Policies policies;
-	private int policyIndex;
 
-	public AttributesResolverImplementation(Request request, ContextHandler contextHandler, Policies policies, int policyIndex) {
+	public AttributesResolverImplementation(Request request, ContextHandler contextHandler, Policies policies) {
 		this.request = request;
 		this.contextHandler = contextHandler;
 		this.policies = policies;
-		this.policyIndex = policyIndex;
 	}
 
 	@Override
 	public Object name(String name) throws UndefinedName {
 		return Stream.of(
 					request.resource(),
-					contextHandler.ofParty(policyIndex),
+					contextHandler.ofParty(request.from().getIndex()),
 					policies.getByIndex(request.requester().index()).party())
 			.map(attributes -> attributes.name(name))
 			.filter(Objects::nonNull)
