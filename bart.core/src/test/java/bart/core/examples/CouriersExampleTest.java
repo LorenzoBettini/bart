@@ -128,15 +128,15 @@ class CouriersExampleTest {
 							.add("type", "addrInfo")
 							.add("city", "Lucca"),
 						new ExpressionWithDescription(
-							attributes -> attributes.name("company").equals("RabbitService"),
-							"company = RabbitService")))
+							attributes -> attributes.nameFromRequester("company").equals("RabbitService"),
+							"company.requester = RabbitService")))
 					.add(new Rule(
 						new Attributes()
 							.add("type", "addrInfo")
 							.add("city", "Lucca"),
 						new ExpressionWithDescription(
-							attributes -> !attributes.name("company").equals("RabbitService"),
-							"company != RabbitService"),
+							attributes -> !attributes.nameFromRequester("company").equals("RabbitService"),
+							"company.requester != RabbitService"),
 						new SingleExchange(
 							me(),
 							new Attributes()
@@ -170,7 +170,7 @@ class CouriersExampleTest {
 						)
 					))));
 		assertPolicies("""
-		1 = Policy[party=[(service : delivery), (company : RabbitService)], rules=[resource=[(type : addrInfo), (city : Lucca)], condition=company = RabbitService, resource=[(type : addrInfo), (city : Lucca)], condition=company != RabbitService, exchange=Exchange[to=ME, resource=[(type : addrInfo), (city : Prato)], from=REQUESTER]]]
+		1 = Policy[party=[(service : delivery), (company : RabbitService)], rules=[resource=[(type : addrInfo), (city : Lucca)], condition=company.requester = RabbitService, resource=[(type : addrInfo), (city : Lucca)], condition=company.requester != RabbitService, exchange=Exchange[to=ME, resource=[(type : addrInfo), (city : Prato)], from=REQUESTER]]]
 		2 = Policy[party=[(service : delivery), (company : FastAndFurious)], rules=[resource=[(type : addrInfo), (city : Prato)], condition=true, exchange=OR(Exchange[to=ME, resource=[(type : addrInfo), (city : Pistoia)], from=REQUESTER], Exchange[to=ME, resource=[(type : addrInfo), (city : Lucca)], from=REQUESTER])]]
 		""");
 		assertResultTrue(
@@ -203,10 +203,10 @@ class CouriersExampleTest {
 			      evaluating Request[requester=2, resource=[(type : addrInfo), (city : Lucca)], from=1]
 			        policy 1: evaluating Request[requester=2, resource=[(type : addrInfo), (city : Lucca)], from=1]
 			          rule 1.1: resource match([(type : addrInfo), (city : Lucca)], [(type : addrInfo), (city : Lucca)]) -> true
-			          rule 1.1: condition company = RabbitService -> false
+			          rule 1.1: condition company.requester = RabbitService -> false
 			        policy 1: evaluating Request[requester=2, resource=[(type : addrInfo), (city : Lucca)], from=1]
 			          rule 1.2: resource match([(type : addrInfo), (city : Lucca)], [(type : addrInfo), (city : Lucca)]) -> true
-			          rule 1.2: condition company != RabbitService -> true
+			          rule 1.2: condition company.requester != RabbitService -> true
 			          rule 1.2: evaluating Exchange[to=ME, resource=[(type : addrInfo), (city : Prato)], from=REQUESTER]
 			          rule 1.2: compliant request found Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=2]
 			      result: true
@@ -232,15 +232,15 @@ class CouriersExampleTest {
 							.add("type", "addrInfo")
 							.add("city", "Lucca"),
 						new ExpressionWithDescription(
-							attributes -> attributes.name("company").equals("RabbitService"),
-							"company = RabbitService")))
+							attributes -> attributes.nameFromRequester("company").equals("RabbitService"),
+							"company.requester = RabbitService")))
 					.add(new Rule(
 						new Attributes()
 							.add("type", "addrInfo")
 							.add("city", "Lucca"),
 						new ExpressionWithDescription(
-							attributes -> !attributes.name("company").equals("RabbitService"),
-							"company != RabbitService"),
+							attributes -> !attributes.nameFromRequester("company").equals("RabbitService"),
+							"company.requester != RabbitService"),
 						new SingleExchange(
 							me(),
 							new Attributes()
@@ -315,10 +315,10 @@ class CouriersExampleTest {
 			      evaluating Request[requester=2, resource=[(type : addrInfo), (city : Lucca)], from=1]
 			        policy 1: evaluating Request[requester=2, resource=[(type : addrInfo), (city : Lucca)], from=1]
 			          rule 1.1: resource match([(type : addrInfo), (city : Lucca)], [(type : addrInfo), (city : Lucca)]) -> true
-			          rule 1.1: condition company = RabbitService -> false
+			          rule 1.1: condition company.requester = RabbitService -> false
 			        policy 1: evaluating Request[requester=2, resource=[(type : addrInfo), (city : Lucca)], from=1]
 			          rule 1.2: resource match([(type : addrInfo), (city : Lucca)], [(type : addrInfo), (city : Lucca)]) -> true
-			          rule 1.2: condition company != RabbitService -> true
+			          rule 1.2: condition company.requester != RabbitService -> true
 			          rule 1.2: evaluating Exchange[to=ME, resource=[(type : addrInfo), (city : Prato)], from=REQUESTER]
 			          rule 1.2: compliant request found Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=2]
 			      result: true

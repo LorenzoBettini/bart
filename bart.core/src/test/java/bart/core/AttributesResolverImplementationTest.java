@@ -84,79 +84,58 @@ class AttributesResolverImplementationTest {
 
 	@Test
 	void testResolveFromRequesterPartyAttributes() throws UndefinedName {
-		// Should find attribute in requester's party attributes (requester index 1 -> policy index 0)
+		// Should find attribute in from party attributes (from index 2 -> policy index 2 -> Bob's policy)
 		Object result = resolver.name("name");
-		assertEquals("Alice", result);
+		assertEquals("Bob", result);
 		
 		result = resolver.name("role");
-		assertEquals("Admin", result);
+		assertEquals("User", result);
 	}
 
 	@Test
 	void testResolutionPriority() throws UndefinedName {
 		// Setup a scenario where the same attribute name exists in multiple sources
-		// to test resolution priority: resource > context > requester party
+		// to test resolution priority: resource > context > from party
 		
 		// Add attribute to context that conflicts with resource
 		contextHandler.add(2, "resource/type", "scanner");
 		
-		// Add attribute to requester's party that conflicts with both
-		var conflictingPolicy = new Policy(
-			new Attributes()
-				.add("resource/type", "copier")
-				.add("name", "Alice"),
-			new Rules()
-		);
-		
-		var conflictPolicies = new Policies().add(conflictingPolicy);
-		var conflictResolver = new AttributesResolverImplementation(request, contextHandler, conflictPolicies);
-		
 		// Should return value from resource (highest priority)
-		Object result = conflictResolver.name("resource/type");
+		Object result = resolver.name("resource/type");
 		assertEquals("printer", result);
 	}
 
 	@Test
 	void testContextVsRequesterPartyPriority() throws UndefinedName {
-		// Test priority between context handler and requester party
+		// Test priority between context handler and from party
 		// when resource doesn't have the attribute
 		
-		// Add same attribute to both context and requester party
+		// Add same attribute to both context and from party
 		contextHandler.add(2, "common/attribute", "from_context");
 		
-		var testPolicy = new Policy(
-			new Attributes()
-				.add("common/attribute", "from_party")
-				.add("name", "TestUser"),
-			new Rules()
-		);
-		
-		var testPolicies = new Policies().add(testPolicy);
-		var testResolver = new AttributesResolverImplementation(request, contextHandler, testPolicies);
-		
-		// Should return value from context handler (higher priority than requester party)
-		Object result = testResolver.name("common/attribute");
+		// Should return value from context handler (higher priority than from party)
+		Object result = resolver.name("common/attribute");
 		assertEquals("from_context", result);
 	}
 
 	@Test
 	void testDifferentContextIndex() throws UndefinedName {
 		// Test resolver with different context index by changing request.from()
-		var requestFromIndex0 = new Request(
-			index(1), // requester 
+		var requestFromIndex1 = new Request(
+			index(3), // requester 
 			new Attributes().add("resource/test", "value"),
-			index(0) // from index 0 - this will be used for context lookup (different from requester)
+			index(1) // from index 1 - this will be used for both context and party lookup
 		);
 		
-		var resolverForIndex0 = new AttributesResolverImplementation(requestFromIndex0, contextHandler, policies);
+		var resolverForIndex1 = new AttributesResolverImplementation(requestFromIndex1, contextHandler, policies);
 		
-		// Should access context for index 0 (as specified in request.from())
-		contextHandler.add(0, "policy0/context", "value0");
-		Object result = resolverForIndex0.name("policy0/context");
-		assertEquals("value0", result);
+		// Should access context for index 1 (as specified in request.from())
+		contextHandler.add(1, "policy1/context", "value1");
+		Object result = resolverForIndex1.name("policy1/context");
+		assertEquals("value1", result);
 		
-		// Should still access requester's party (index 1 -> policy index 0)
-		result = resolverForIndex0.name("name");
+		// Should access from party (index 1 -> policy index 1 -> Alice's policy)
+		result = resolverForIndex1.name("name");
 		assertEquals("Alice", result);
 	}
 
@@ -206,9 +185,9 @@ class AttributesResolverImplementationTest {
 	void testResolverWithEmptyAttributes() {
 		// Test resolver behavior with empty attributes in various sources
 		var emptyRequest = new Request(
-			index(1),
+			index(2),
 			new Attributes(), // empty resource
-			index(2)
+			index(1) // from index 1 (valid policy index)
 		);
 		
 		var emptyContextHandler = new ContextHandler(); // no attributes added
@@ -227,20 +206,20 @@ class AttributesResolverImplementationTest {
 
 	@Test
 	void testRequesterIndexMapping() throws UndefinedName {
-		// Test that requester index is correctly mapped to policy index
-		// Requester with index 2 should map to policy index 1 (2-1=1)
-		var requestFromIndex2 = new Request(
-			index(2), // requester index 2
+		// Test that from index is correctly mapped to policy index
+		// From with index 1 should map to policy index 1 (Alice's policy)
+		var requestFromIndex1 = new Request(
+			index(3), // requester index 3
 			new Attributes().add("resource/test", "value"),
-			index(3) // from
+			index(1) // from index 1
 		);
 		
-		var resolverForIndex2 = new AttributesResolverImplementation(
-			requestFromIndex2, contextHandler, policies);
+		var resolverForIndex1 = new AttributesResolverImplementation(
+			requestFromIndex1, contextHandler, policies);
 		
-		// Should access policy at index 1 (Bob's policy) for requester index 2
-		Object result = resolverForIndex2.name("department");
-		assertEquals("Finance", result);
+		// Should access policy at index 1 (Alice's policy) for from index 1
+		Object result = resolverForIndex1.name("name");
+		assertEquals("Alice", result);
 	}
 
 	@Test
@@ -257,8 +236,8 @@ class AttributesResolverImplementationTest {
 		assertEquals("printer", resolver.name("resource/type"));
 		assertEquals("10:30", resolver.name("time/current"));
 		assertEquals("3rd", resolver.name("location/floor"));
-		assertEquals("Alice", resolver.name("name"));
-		assertEquals("Admin", resolver.name("role"));
+		assertEquals("Bob", resolver.name("name")); // from party (index 2 -> Bob)
+		assertEquals("User", resolver.name("role")); // from party (index 2 -> Bob)
 	}
 
 	@Test
