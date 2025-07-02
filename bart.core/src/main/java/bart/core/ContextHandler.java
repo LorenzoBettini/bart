@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * Party indexes are 1-based, so the first party is 1, the second is 2, and so on.
+ * 
  * @author Lorenzo Bettini
  */
 public class ContextHandler {

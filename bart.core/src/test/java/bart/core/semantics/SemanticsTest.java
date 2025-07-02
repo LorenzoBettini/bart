@@ -310,8 +310,8 @@ class SemanticsTest {
 						new Attributes()
 							.add("paper", "white"),
 						new ExpressionWithDescription(
-								c -> c.name("name").equals("Bob"),
-								"name = Bob"
+								c -> c.nameFromRequester("name").equals("Bob"),
+								"name.requester = Bob"
 							)
 					))));
 		// Alice requests
@@ -327,7 +327,7 @@ class SemanticsTest {
 			evaluating Request[requester=1, resource=[(paper : white)], from=3]
 			  policy 3: evaluating Request[requester=1, resource=[(paper : white)], from=3]
 			    rule 3.1: resource match([(paper : white)], [(paper : white)]) -> true
-			    rule 3.1: condition name = Bob -> false
+			    rule 3.1: condition name.requester = Bob -> false
 			result: false
 			"""
 		);
@@ -344,7 +344,7 @@ class SemanticsTest {
 			evaluating Request[requester=2, resource=[(paper : white)], from=3]
 			  policy 3: evaluating Request[requester=2, resource=[(paper : white)], from=3]
 			    rule 3.1: resource match([(paper : white)], [(paper : white)]) -> true
-			    rule 3.1: condition name = Bob -> true
+			    rule 3.1: condition name.requester = Bob -> true
 			result: true
 			""",
 			"Request[requester=2, resource=[(paper : white)], from=3]"
