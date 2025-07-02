@@ -283,4 +283,41 @@ class AttributesResolverImplementationTest {
 		Object resultFromRequester = resolver.nameFromRequester("test/attribute");
 		assertEquals("from_requester", resultFromRequester);
 	}
+
+	@Test
+	void testNameFromPartyWithMatchingParty() throws UndefinedName {
+		// Test nameFromParty with attributes that match an existing party
+		// Should find Alice's policy (index 1) when searching for role "Admin"
+		var searchAttributes = new Attributes().add("role", "Admin");
+		
+		// Add context attribute for Alice's index (1) - policies are indexed starting from 1
+		contextHandler.add(1, "context/level", "administrator");
+		
+		// Should find attribute from Alice's policy context
+		Object result = resolver.nameFromParty("context/level", searchAttributes);
+		assertEquals("administrator", result);
+		
+		// Should find attribute from Alice's party attributes
+		result = resolver.nameFromParty("name", searchAttributes);
+		assertEquals("Alice", result);
+		
+		// Should find attribute from resource (highest priority) when it exists
+		result = resolver.nameFromParty("resource/type", searchAttributes);
+		assertEquals("printer", result);
+	}
+
+	@Test
+	void testNameFromPartyWithNoMatchingParty() throws UndefinedName {
+		// Test nameFromParty when no party matches the search attributes
+		var searchAttributes = new Attributes().add("role", "NonExistentRole");
+		
+		// Should throw UndefinedName when no party matches and attribute is not in resource
+		assertThatThrownBy(() -> resolver.nameFromParty("name", searchAttributes))
+			.isInstanceOf(UndefinedName.class)
+			.hasMessage("Undefined name: name");
+		
+		// Should still find attribute from resource even when no party matches
+		Object result = resolver.nameFromParty("resource/type", searchAttributes);
+		assertEquals("printer", result);
+	}
 }

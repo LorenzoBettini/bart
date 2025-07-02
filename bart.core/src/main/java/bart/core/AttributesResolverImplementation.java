@@ -35,6 +35,23 @@ public final class AttributesResolverImplementation implements AttributesResolve
 		return retrieveName(name, contextHandler.ofParty(index), policies.getByIndex(index).party());
 	}
 
+
+	@Override
+	public Object nameFromParty(String name, Attributes attributes) throws UndefinedName {
+		var attributeMatcher = new AttributeMatcher();
+		var firstMatchingParty = policies.getPolicyData()
+			.filter(d -> attributeMatcher.match(attributes, d.policy().party()))
+			.findFirst();
+		var fromContext = new Attributes();
+		var fromParty = new Attributes();
+		if (firstMatchingParty.isPresent()) {
+			var policyData = firstMatchingParty.get();
+			fromContext = contextHandler.ofParty(policyData.index());
+			fromParty = policyData.policy().party();
+		}
+		return retrieveName(name, fromContext, fromParty);
+	}
+
 	private Object retrieveName(String name, Attributes fromContext, Attributes fromParty) throws UndefinedName {
 		return Stream.of(
 					request.resource(),
