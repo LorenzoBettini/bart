@@ -181,7 +181,7 @@ class AttributesResolverImplementationTest {
 	}
 
 	@Test
-	void testNullAttributeValues() throws UndefinedName {
+	void testNullAttributeValues() {
 		// Test handling of null attribute values (should be filtered out)
 		// Note: Attributes.add() doesn't allow null values, but we can test the filter logic
 		// by having null returned from name() method indirectly
@@ -203,7 +203,7 @@ class AttributesResolverImplementationTest {
 	}
 
 	@Test
-	void testResolverWithEmptyAttributes() throws UndefinedName {
+	void testResolverWithEmptyAttributes() {
 		// Test resolver behavior with empty attributes in various sources
 		var emptyRequest = new Request(
 			index(1),
