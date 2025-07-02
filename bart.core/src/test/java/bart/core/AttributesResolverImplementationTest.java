@@ -288,4 +288,20 @@ class AttributesResolverImplementationTest {
 			.isInstanceOf(UndefinedName.class)
 			.hasMessage("Undefined name: null");
 	}
+
+	@Test
+	void testNameFromRequesterUsesRequesterIndex() throws UndefinedName {
+		// Test that nameFromRequester uses requester.index() instead of from.getIndex() for context lookup
+		// Setup different values in context for requester index (1) vs from index (2)
+		contextHandler.add(1, "test/attribute", "from_requester");
+		contextHandler.add(2, "test/attribute", "from_target");
+		
+		// name() should use from index (2)
+		Object resultFromName = resolver.name("test/attribute");
+		assertEquals("from_target", resultFromName);
+		
+		// nameFromRequester() should use requester index (1)
+		Object resultFromRequester = resolver.nameFromRequester("test/attribute");
+		assertEquals("from_requester", resultFromRequester);
+	}
 }

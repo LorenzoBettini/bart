@@ -25,13 +25,23 @@ public final class AttributesResolverImplementation implements AttributesResolve
 
 	@Override
 	public Object name(String name) throws UndefinedName {
+		return retrieveName(name, contextHandler.ofParty(request.from().getIndex()));
+	}
+
+	@Override
+	public Object nameFromRequester(String name) throws UndefinedName {
+		return retrieveName(name, contextHandler.ofParty(request.requester().index()));
+	}
+
+	private Object retrieveName(String name, Attributes fromContext) throws UndefinedName {
 		return Stream.of(
 					request.resource(),
-					contextHandler.ofParty(request.from().getIndex()),
+					fromContext,
 					policies.getByIndex(request.requester().index()).party())
 			.map(attributes -> attributes.name(name))
 			.filter(Objects::nonNull)
 			.findFirst()
 			.orElseThrow(() -> new UndefinedName(name));
 	}
+
 }
