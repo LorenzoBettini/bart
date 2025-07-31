@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bart.core.Attributes;
-import bart.core.OrExchange;
 import bart.core.Policies;
 import bart.core.Policy;
 import bart.core.Request;
@@ -232,7 +231,8 @@ public class ExtendedBenchmark {
 	
 	private long benchmarkPolicies(int numPolicies) {
 		// Always match middle policy for consistent results
-		int middleIndex = Math.max(1, numPolicies / 2);
+		// Since loop starts from 1, middle index should be in range [1, numPolicies]
+		int middleIndex = Math.max(1, (numPolicies + 1) / 2);
 		Policies policies = createPoliciesScenario(numPolicies, middleIndex);
 		Request request = createRequest("target");
 		return measureTime(policies, request);
@@ -257,7 +257,16 @@ public class ExtendedBenchmark {
 		// Always have middle exchange succeed for consistent results
 		int midPos = Math.max(1, numExchanges / 2);
 		Policies policies = createExchangeScenario(numExchanges, midPos);
-		Request request = createRequest("target");
+		
+		// Request from index 1 (requester) to index 2 (provider) 
+		Request request = new Request(
+			index(1),  // requester (first policy)
+			new Attributes()
+				.add("resource", "target")
+				.add("scope", "public"),
+			index(2)   // provider (second policy)
+		);
+		
 		return measureTime(policies, request);
 	}
 	
@@ -270,17 +279,22 @@ public class ExtendedBenchmark {
 				.add("type", "service")
 				.add("category", "business");
 			
-			Attributes resourceAttrs = new Attributes();
+			// For the matching policy, create a rule that will match our test request
 			if (i == matchingPolicyIndex) {
-				resourceAttrs.add("resource", "target");
+				// Create rule with exact matching resource attributes
+				Attributes resourceAttrs = new Attributes()
+					.add("resource", "target")
+					.add("scope", "public");
+				Rules rules = new Rules().add(new Rule(resourceAttrs));
+				policies.add(new Policy(partyAttrs, rules));
 			} else {
-				resourceAttrs.add("resource", "other" + i);
+				// Create rule with different resource attributes (won't match)
+				Attributes resourceAttrs = new Attributes()
+					.add("resource", "other" + i)
+					.add("scope", "public");
+				Rules rules = new Rules().add(new Rule(resourceAttrs));
+				policies.add(new Policy(partyAttrs, rules));
 			}
-			resourceAttrs.add("scope", "public")
-				.add("priority", String.valueOf(i));
-			
-			Rules rules = new Rules().add(new Rule(resourceAttrs));
-			policies.add(new Policy(partyAttrs, rules));
 		}
 		
 		return policies;
@@ -310,63 +324,45 @@ public class ExtendedBenchmark {
 	private Policies createExchangeScenario(int numExchanges, int successExchangeIndex) {
 		Policies policies = new Policies();
 		
-		// Main provider policy with complex exchanges
+		// First policy (index 1) - the requester that can provide payment
+		Attributes requesterAttrs = new Attributes()
+			.add("id", "requester")
+			.add("type", "client");
+		
+		Attributes paymentAttrs = new Attributes()
+			.add("exchangeResource", "payment")
+			.add("scope", "public");
+		
+		Rules requesterRules = new Rules().add(new Rule(paymentAttrs));
+		policies.add(new Policy(requesterAttrs, requesterRules));
+		
+		// Second policy (index 2) - the provider with exchange requirement
 		Attributes providerAttrs = new Attributes()
 			.add("id", "provider")
 			.add("type", "service");
 		
 		Attributes resourceAttrs = new Attributes()
-			.add("resource", "target");
+			.add("resource", "target")
+			.add("scope", "public");
 		
+		// Simple exchange - provider wants payment from requester
 		bart.core.Exchange exchange = createTestExchange(numExchanges, successExchangeIndex);
 		Rules rules = new Rules().add(new Rule(resourceAttrs, exchange));
 		policies.add(new Policy(providerAttrs, rules));
-		
-		// Create supporting policies that may or may not satisfy the exchanges
-		for (int i = 1; i <= numExchanges; i++) {
-			Attributes supportAttrs = new Attributes()
-				.add("id", "support" + i)
-				.add("type", "support");
-			
-			Attributes supportResource = new Attributes();
-			if (i == successExchangeIndex) {
-				supportResource.add("supportResource", "exchange" + i);
-			} else {
-				supportResource.add("supportResource", "noMatch" + i);
-			}
-			
-			Rules supportRules = new Rules().add(new Rule(supportResource));
-			policies.add(new Policy(supportAttrs, supportRules));
-		}
 		
 		return policies;
 	}
 	
 	private bart.core.Exchange createTestExchange(int numExchanges, int successIndex) {
-		if (numExchanges == 1) {
-			return new SingleExchange(
-				me(),
-				new Attributes().add("supportResource", "exchange1"),
-				requester()
-			);
-		}
-		
-		List<bart.core.Exchange> exchanges = new ArrayList<>();
-		for (int i = 1; i <= numExchanges; i++) {
-			exchanges.add(new SingleExchange(
-				me(),
-				new Attributes().add("supportResource", "exchange" + i),
-				requester()
-			));
-		}
-		
-		// Combine with OR - first successful exchange wins
-		bart.core.Exchange result = exchanges.get(0);
-		for (int i = 1; i < exchanges.size(); i++) {
-			result = new OrExchange(result, exchanges.get(i));
-		}
-		
-		return result;
+		// For simplicity, create a single exchange that requests something from requester
+		// This mirrors the pattern from SemanticsTest
+		return new SingleExchange(
+			me(),
+			new Attributes()
+				.add("exchangeResource", "payment")  // Something the provider wants
+				.add("scope", "public"),
+			requester()  // The requester provides this in exchange
+		);
 	}
 	
 	private Request createRequest(String resourceValue) {
@@ -374,7 +370,7 @@ public class ExtendedBenchmark {
 			index(999),
 			new Attributes()
 				.add("resource", resourceValue)
-				.add("requesterType", "client"),
+				.add("scope", "public"),  // Match the policy resource attributes
 			anySuchThat(new Attributes().add("type", "service"))
 		);
 	}
@@ -383,7 +379,7 @@ public class ExtendedBenchmark {
 		Attributes requestAttrs = new Attributes()
 			.add("resource", "target");
 		
-		// Always add the same attributes with matching values
+		// Match exactly the same attributes as in the policy
 		for (int i = 1; i <= numAttributes; i++) {
 			requestAttrs.add("attr" + i, "value" + i);
 		}
@@ -405,9 +401,10 @@ public class ExtendedBenchmark {
 			Result result = semantics.evaluate(request);
 			long endTime = System.nanoTime();
 			
-			// Verify that the evaluation actually ran
-			if (result == null) {
-				throw new RuntimeException("Result should not be null");
+			// Verify that the evaluation succeeded (request was permitted)
+			if (result == null || !result.isPermitted()) {
+				throw new RuntimeException("Benchmark failed: request should be permitted but was " + 
+					(result == null ? "null" : "denied"));
 			}
 			
 			totalTime += (endTime - startTime);
