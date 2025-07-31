@@ -11,15 +11,18 @@ I have successfully implemented a simplified benchmarking suite for the BART pro
 ## Key Features Implemented
 
 ### Consistent Middle-Position Matching
+
 All benchmarks use middle-position matching scenarios for reliable, consistent results. This eliminates the complexity of optimal/average/worst cases while providing scientifically valid performance measurements.
 
 ### Statistical Reliability
+
 - Each measurement is repeated 3 times and averaged for statistical significance
 - JVM warm-up cycles eliminate cold start timing artifacts
 - Measurements use `System.nanoTime()` for high precision
 - Results are provided in microseconds (μs)
 
 ### Research-Ready Output
+
 - **CSV files** for easy import into statistical analysis tools
 - **Console progress** with real-time execution time feedback
 - Simple format suitable for direct use in research papers
@@ -27,11 +30,13 @@ All benchmarks use middle-position matching scenarios for reliable, consistent r
 ## Benchmark Classes Created
 
 ### 1. `SimpleBenchmark.java`
+
 - Quick demonstration with small ranges (1-20 policies, 1-15 attributes, 1-8 exchanges)
 - Ideal for development testing and validation
 - Fast execution for immediate feedback
 
 ### 2. `ExtendedBenchmark.java`
+
 - Comprehensive benchmarking with research-suitable ranges
 - Command-line options: `policies`, `attributes`, `exchanges`, `quick`, or run all
 - Progress indicators for long-running benchmarks
@@ -42,7 +47,8 @@ All benchmarks use middle-position matching scenarios for reliable, consistent r
 From the comprehensive benchmark run:
 
 ### Policy Count Impact (Linear Scaling)
-```
+
+```text
 Policies   Time (μs)
 1          172
 51         954
@@ -52,7 +58,8 @@ Policies   Time (μs)
 ```
 
 ### Attribute Count Impact (Mostly Constant)
-```
+
+```text
 Attributes   Time (μs)
 1            47
 11           58
@@ -62,7 +69,8 @@ Attributes   Time (μs)
 ```
 
 ### Exchange Count Impact (Moderate Growth)
-```
+
+```text
 Exchanges   Time (μs)
 1           50
 11          56
@@ -102,6 +110,7 @@ mvn exec:java -Dexec.mainClass="bart.core.benchmarks.ExtendedBenchmark" -Dexec.a
 ## Technical Implementation Details
 
 ### JVM Warm-up Strategy
+
 The benchmarks include comprehensive JVM warm-up to eliminate cold start bias:
 
 - Initial warm-up runs before measurements
@@ -109,6 +118,7 @@ The benchmarks include comprehensive JVM warm-up to eliminate cold start bias:
 - Consistent timing across all test scenarios
 
 ### Middle-Position Matching Logic
+
 All benchmarks use a consistent middle-position approach:
 
 - Policies: Target policy is at index `policyCount / 2`
