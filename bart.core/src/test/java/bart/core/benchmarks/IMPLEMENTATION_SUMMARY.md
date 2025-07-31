@@ -5,7 +5,7 @@
 I have successfully implemented a simplified benchmarking suite for the BART project that measures execution time versus three key metrics:
 
 1. **Number of Policies** (1-1000, step 50)
-2. **Number of Attributes** (1-100, step 10) 
+2. **Number of Attributes** (1-100, step 10)
 3. **Number of Exchanges** (1-100, step 10)
 
 ## Key Features Implemented
