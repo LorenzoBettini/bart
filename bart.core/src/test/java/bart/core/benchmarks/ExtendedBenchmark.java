@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import bart.core.AndExchange;
 import bart.core.Attributes;
 import bart.core.Policies;
 import bart.core.Policy;
@@ -303,20 +304,27 @@ public class ExtendedBenchmark {
 	private Policies createAttributeScenario(int numAttributes, int matchingAttrIndex) {
 		Policies policies = new Policies();
 		
-		Attributes partyAttrs = new Attributes()
-			.add("id", "provider")
-			.add("type", "service");
-		
-		Attributes resourceAttrs = new Attributes()
-			.add("resource", "target");
-		
-		// Always add a consistent set of attributes
-		for (int i = 1; i <= numAttributes; i++) {
-			resourceAttrs.add("attr" + i, "value" + i);
+		// Create multiple policies with increasing attribute complexity
+		// Each policy has a different set of attributes, making matching more complex
+		for (int policyIndex = 1; policyIndex <= numAttributes; policyIndex++) {
+			Attributes partyAttrs = new Attributes()
+				.add("id", "provider-" + policyIndex)
+				.add("type", "service");
+			
+			Attributes resourceAttrs = new Attributes()
+				.add("resource", "target")
+				.add("scope", "public")
+				.add("category", (policyIndex == matchingAttrIndex) ? "match" : "nomatch")
+				.add("priority", "high");
+			
+			// Add varying number of detail attributes for complexity
+			for (int j = 1; j <= policyIndex; j++) {
+				resourceAttrs.add("detail" + j, "value" + j);
+			}
+			
+			Rules rules = new Rules().add(new Rule(resourceAttrs));
+			policies.add(new Policy(partyAttrs, rules));
 		}
-		
-		Rules rules = new Rules().add(new Rule(resourceAttrs));
-		policies.add(new Policy(partyAttrs, rules));
 		
 		return policies;
 	}
@@ -324,16 +332,26 @@ public class ExtendedBenchmark {
 	private Policies createExchangeScenario(int numExchanges, int successExchangeIndex) {
 		Policies policies = new Policies();
 		
-		// First policy (index 1) - the requester that can provide payment
+		// First policy (index 1) - the requester that can provide all needed payment resources
 		Attributes requesterAttrs = new Attributes()
 			.add("id", "requester")
 			.add("type", "client");
 		
-		Attributes paymentAttrs = new Attributes()
+		Rules requesterRules = new Rules();
+		// Add rules for all payment resources that might be needed
+		for (int i = 1; i <= numExchanges; i++) {
+			Attributes paymentAttrs = new Attributes()
+				.add("exchangeResource", "payment" + i)
+				.add("scope", "public");
+			requesterRules.add(new Rule(paymentAttrs));
+		}
+		
+		// Also add the simple "payment" resource for single exchange case
+		Attributes simplePaymentAttrs = new Attributes()
 			.add("exchangeResource", "payment")
 			.add("scope", "public");
+		requesterRules.add(new Rule(simplePaymentAttrs));
 		
-		Rules requesterRules = new Rules().add(new Rule(paymentAttrs));
 		policies.add(new Policy(requesterAttrs, requesterRules));
 		
 		// Second policy (index 2) - the provider with exchange requirement
@@ -345,7 +363,7 @@ public class ExtendedBenchmark {
 			.add("resource", "target")
 			.add("scope", "public");
 		
-		// Simple exchange - provider wants payment from requester
+		// Complex exchange that scales with numExchanges
 		bart.core.Exchange exchange = createTestExchange(numExchanges, successExchangeIndex);
 		Rules rules = new Rules().add(new Rule(resourceAttrs, exchange));
 		policies.add(new Policy(providerAttrs, rules));
@@ -354,15 +372,42 @@ public class ExtendedBenchmark {
 	}
 	
 	private bart.core.Exchange createTestExchange(int numExchanges, int successIndex) {
-		// For simplicity, create a single exchange that requests something from requester
-		// This mirrors the pattern from SemanticsTest
-		return new SingleExchange(
-			me(),
-			new Attributes()
-				.add("exchangeResource", "payment")  // Something the provider wants
-				.add("scope", "public"),
-			requester()  // The requester provides this in exchange
-		);
+		// Create exchanges that increase in complexity based on numExchanges
+		if (numExchanges == 1) {
+			// Simple single exchange
+			return new SingleExchange(
+				me(),
+				new Attributes()
+					.add("exchangeResource", "payment")
+					.add("scope", "public"),
+				requester()
+			);
+		} else {
+			// Create nested AND exchanges that increase evaluation complexity
+			bart.core.Exchange rootExchange = new SingleExchange(
+				me(),
+				new Attributes()
+					.add("exchangeResource", "payment1")
+					.add("scope", "public"),
+				requester()
+			);
+			
+			// Build nested AND structure for complexity
+			for (int i = 2; i <= numExchanges; i++) {
+				rootExchange = new AndExchange(
+					rootExchange,
+					new SingleExchange(
+						me(),
+						new Attributes()
+							.add("exchangeResource", "payment" + i)
+							.add("scope", "public"),
+						requester()
+					)
+				);
+			}
+			
+			return rootExchange;
+		}
 	}
 	
 	private Request createRequest(String resourceValue) {
@@ -377,11 +422,14 @@ public class ExtendedBenchmark {
 	
 	private Request createAttributeRequest(int numAttributes, int matchingPosition) {
 		Attributes requestAttrs = new Attributes()
-			.add("resource", "target");
+			.add("resource", "target")
+			.add("scope", "public")
+			.add("category", "match")  // Will match the target policy
+			.add("priority", "high");
 		
-		// Match exactly the same attributes as in the policy
-		for (int i = 1; i <= numAttributes; i++) {
-			requestAttrs.add("attr" + i, "value" + i);
+		// Add the same detail attributes that the matching policy has
+		for (int j = 1; j <= matchingPosition; j++) {
+			requestAttrs.add("detail" + j, "value" + j);
 		}
 		
 		return new Request(
