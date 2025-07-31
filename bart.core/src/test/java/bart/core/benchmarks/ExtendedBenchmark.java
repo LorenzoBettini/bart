@@ -236,6 +236,13 @@ public class ExtendedBenchmark {
 		int middleIndex = Math.max(1, (numPolicies + 1) / 2);
 		Policies policies = createPoliciesScenario(numPolicies, middleIndex);
 		Request request = createRequest("target");
+		
+		// Add extra warm-up for policy benchmark to avoid first-run bias
+		for (int i = 0; i < 5; i++) {
+			Semantics warmupSemantics = new Semantics(policies);
+			warmupSemantics.evaluate(request);
+		}
+		
 		return measureTime(policies, request);
 	}
 	
@@ -267,6 +274,12 @@ public class ExtendedBenchmark {
 				.add("scope", "public"),
 			index(2)   // provider (second policy)
 		);
+		
+		// Add extra warm-up for exchange benchmark to avoid first-run bias
+		for (int i = 0; i < 5; i++) {
+			Semantics warmupSemantics = new Semantics(policies);
+			warmupSemantics.evaluate(request);
+		}
 		
 		return measureTime(policies, request);
 	}
