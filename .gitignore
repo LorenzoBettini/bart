@@ -26,3 +26,6 @@ build
 
 # for VS code node modules
 node_modules
+
+# benchmarks
+*.csv
