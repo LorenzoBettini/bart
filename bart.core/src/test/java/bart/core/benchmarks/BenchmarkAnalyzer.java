@@ -31,321 +31,320 @@ def load_and_plot_benchmark(csv_file, metric_name, title):
         # Load data
         df = pd.read_csv(csv_file)
         
-        # Create figure with subplots
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+        # Create figure
+        fig, ax = plt.subplots(1, 1, figsize=(10, 6))
         
-        # Plot 1: Execution time vs metric
-        ax1.plot(df.iloc[:, 0], df['Optimal_us'], 'o-', label='Optimal Case', linewidth=2, markersize=6)
-        ax1.plot(df.iloc[:, 0], df['Average_us'], 's-', label='Average Case', linewidth=2, markersize=6)
-        ax1.plot(df.iloc[:, 0], df['Worst_us'], '^-', label='Worst Case', linewidth=2, markersize=6)
+        # Plot execution time vs metric
+        ax.plot(df.iloc[:, 0], df['Time_us'], 'o-', color='blue', linewidth=2, markersize=6)
         
-        ax1.set_xlabel(metric_name, fontsize=12)
-        ax1.set_ylabel('Execution Time (μs)', fontsize=12)
-        ax1.set_title(f'{title} - Execution Time', fontsize=14, fontweight='bold')
-        ax1.legend(fontsize=10)
-        ax1.grid(True, alpha=0.3)
+        ax.set_xlabel(metric_name, fontsize=12)
+        ax.set_ylabel('Execution Time (μs)', fontsize=12)
+        ax.set_title(f'{title} - Execution Time vs {metric_name}', fontsize=14, fontweight='bold')
+        ax.grid(True, alpha=0.3)
         
-        # Plot 2: Performance ratio (worst/optimal)
-        ratio = df['Worst_us'] / df['Optimal_us']
-        ax2.plot(df.iloc[:, 0], ratio, 'o-', color='red', linewidth=2, markersize=6)
-        ax2.set_xlabel(metric_name, fontsize=12)
-        ax2.set_ylabel('Performance Ratio (Worst/Optimal)', fontsize=12)
-        ax2.set_title(f'{title} - Performance Degradation', fontsize=14, fontweight='bold')
-        ax2.grid(True, alpha=0.3)
-        
-        # Add trend line for ratio
-        z = np.polyfit(df.iloc[:, 0], ratio, 1)
+        # Add trend line
+        z = np.polyfit(df.iloc[:, 0], df['Time_us'], 1)
         p = np.poly1d(z)
-        ax2.plot(df.iloc[:, 0], p(df.iloc[:, 0]), "--", alpha=0.7, label=f'Trend (slope: {z[0]:.3f})')
-        ax2.legend(fontsize=10)
+        ax.plot(df.iloc[:, 0], p(df.iloc[:, 0]), "--", alpha=0.8, color='red', label=f'Trend (slope: {z[0]:.2f})')
+        ax.legend()
         
         plt.tight_layout()
-        plt.savefig(f'{csv_file.replace(".csv", "_plot.png")}', dpi=300, bbox_inches='tight')
-        plt.show()
         
-        # Print summary statistics
-        print(f"\\n=== {title} Analysis ===")
-        print(f"Range: {df.iloc[0, 0]} to {df.iloc[-1, 0]} {metric_name.lower()}")
-        print(f"Optimal time range: {df['Optimal_us'].min():.2f} - {df['Optimal_us'].max():.2f} μs")
-        print(f"Worst time range: {df['Worst_us'].min():.2f} - {df['Worst_us'].max():.2f} μs")
-        print(f"Max performance ratio: {ratio.max():.2f}x")
-        print(f"Average performance ratio: {ratio.mean():.2f}x")
+        # Print statistics
+        print(f"\\n{title} Statistics:")
+        print(f"Time range: {df['Time_us'].min():.2f} - {df['Time_us'].max():.2f} μs")
+        print(f"Average time: {df['Time_us'].mean():.2f} μs")
+        print(f"Scaling factor: {df['Time_us'].max() / df['Time_us'].min():.2f}x")
         
-        return df
+        # Calculate correlation coefficient
+        correlation = np.corrcoef(df.iloc[:, 0], df['Time_us'])[0, 1]
+        print(f"Correlation coefficient: {correlation:.3f}")
         
-    except FileNotFoundError:
-        print(f"File {csv_file} not found. Run benchmarks first.")
+        return fig
+    except Exception as e:
+        print(f"Error plotting {csv_file}: {e}")
         return None
 
-def create_comparison_plot():
-    # Load all benchmark data
-    policies_df = pd.read_csv('policies_benchmark.csv')
-    attributes_df = pd.read_csv('attributes_benchmark.csv') 
-    exchanges_df = pd.read_csv('exchanges_benchmark.csv')
-    
-    # Normalize data for comparison (scale to 0-1)
-    def normalize_series(series):
-        return (series - series.min()) / (series.max() - series.min())
-    
-    fig, ax = plt.subplots(figsize=(12, 8))
-    
-    # Plot normalized worst-case performance
-    ax.plot(normalize_series(policies_df.iloc[:, 0]), 
-            normalize_series(policies_df['Worst_us']), 
-            'o-', label='Policy Count', linewidth=2, markersize=6)
-    
-    ax.plot(normalize_series(attributes_df.iloc[:, 0]), 
-            normalize_series(attributes_df['Worst_us']), 
-            's-', label='Attribute Count', linewidth=2, markersize=6)
-    
-    ax.plot(normalize_series(exchanges_df.iloc[:, 0]), 
-            normalize_series(exchanges_df['Worst_us']), 
-            '^-', label='Exchange Count', linewidth=2, markersize=6)
-    
-    ax.set_xlabel('Normalized Metric Value', fontsize=12)
-    ax.set_ylabel('Normalized Execution Time', fontsize=12)
-    ax.set_title('BART Performance Comparison - Worst Case Scenarios', fontsize=14, fontweight='bold')
-    ax.legend(fontsize=11)
-    ax.grid(True, alpha=0.3)
-    
-    plt.tight_layout()
-    plt.savefig('bart_performance_comparison.png', dpi=300, bbox_inches='tight')
-    plt.show()
-
-def generate_report():
-    print("\\n" + "="*60)
-    print("BART PERFORMANCE BENCHMARK REPORT")
-    print("="*60)
-    
-    # Process each benchmark type
-    policies_df = load_and_plot_benchmark('policies_benchmark.csv', 'Number of Policies', 'Policy Count Impact')
-    attributes_df = load_and_plot_benchmark('attributes_benchmark.csv', 'Number of Attributes', 'Attribute Count Impact') 
-    exchanges_df = load_and_plot_benchmark('exchanges_benchmark.csv', 'Number of Exchanges', 'Exchange Count Impact')
-    
-    if all(df is not None for df in [policies_df, attributes_df, exchanges_df]):
-        create_comparison_plot()
+def create_combined_plot():
+    try:
+        # Load all benchmark data
+        policies_df = pd.read_csv('policies_benchmark.csv')
+        attributes_df = pd.read_csv('attributes_benchmark.csv')
+        exchanges_df = pd.read_csv('exchanges_benchmark.csv')
         
-        print("\\n" + "="*60)
-        print("SUMMARY INSIGHTS")
-        print("="*60)
-        print("1. Check which metric has the steepest performance degradation")
-        print("2. Identify if any metric shows exponential vs linear growth")
-        print("3. Compare optimal vs worst-case scenarios for each metric")
-        print("4. Use ratio plots to understand relative performance impact")
-        print("\\nAll plots saved as PNG files for inclusion in papers.")
+        # Normalize data for comparison
+        def normalize_series(series):
+            return (series - series.min()) / (series.max() - series.min())
+        
+        # Create combined comparison plot
+        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+        
+        # Individual plots
+        axes[0, 0].plot(policies_df['Policies'], policies_df['Time_us'], 'o-', color='blue', linewidth=2)
+        axes[0, 0].set_title('Policies vs Execution Time')
+        axes[0, 0].set_xlabel('Number of Policies')
+        axes[0, 0].set_ylabel('Time (μs)')
+        axes[0, 0].grid(True, alpha=0.3)
+        
+        axes[0, 1].plot(attributes_df['Attributes'], attributes_df['Time_us'], 'o-', color='green', linewidth=2)
+        axes[0, 1].set_title('Attributes vs Execution Time')
+        axes[0, 1].set_xlabel('Number of Attributes')
+        axes[0, 1].set_ylabel('Time (μs)')
+        axes[0, 1].grid(True, alpha=0.3)
+        
+        axes[1, 0].plot(exchanges_df['Exchanges'], exchanges_df['Time_us'], 'o-', color='red', linewidth=2)
+        axes[1, 0].set_title('Exchanges vs Execution Time')
+        axes[1, 0].set_xlabel('Number of Exchanges')
+        axes[1, 0].set_ylabel('Time (μs)')
+        axes[1, 0].grid(True, alpha=0.3)
+        
+        # Normalized comparison plot
+        max_len = min(len(policies_df), len(attributes_df), len(exchanges_df))
+        x_normalized = np.linspace(0, 1, max_len)
+        
+        axes[1, 1].plot(x_normalized, normalize_series(policies_df['Time_us'][:max_len]), 'o-', label='Policies', linewidth=2)
+        axes[1, 1].plot(x_normalized, normalize_series(attributes_df['Time_us'][:max_len]), 's-', label='Attributes', linewidth=2)
+        axes[1, 1].plot(x_normalized, normalize_series(exchanges_df['Time_us'][:max_len]), '^-', label='Exchanges', linewidth=2)
+        axes[1, 1].set_title('Normalized Comparison')
+        axes[1, 1].set_xlabel('Normalized Metric Range (0-1)')
+        axes[1, 1].set_ylabel('Normalized Execution Time (0-1)')
+        axes[1, 1].legend()
+        axes[1, 1].grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        return fig
+    except Exception as e:
+        print(f"Error creating combined plot: {e}")
+        return None
 
-if __name__ == "__main__":
-    generate_report()
+# Generate all plots
+print("Generating BART Performance Analysis Plots...")
+
+# Individual plots
+fig1 = load_and_plot_benchmark('policies_benchmark.csv', 'Number of Policies', 'Policy Scaling')
+if fig1:
+    fig1.savefig('policies_performance.png', dpi=300, bbox_inches='tight')
+
+fig2 = load_and_plot_benchmark('attributes_benchmark.csv', 'Number of Attributes', 'Attribute Scaling')
+if fig2:
+    fig2.savefig('attributes_performance.png', dpi=300, bbox_inches='tight')
+
+fig3 = load_and_plot_benchmark('exchanges_benchmark.csv', 'Number of Exchanges', 'Exchange Scaling')
+if fig3:
+    fig3.savefig('exchanges_performance.png', dpi=300, bbox_inches='tight')
+
+# Combined plot
+fig4 = create_combined_plot()
+if fig4:
+    fig4.savefig('combined_performance.png', dpi=300, bbox_inches='tight')
+
+plt.show()
+print("Plots saved as PNG files.")
 """;
 		
-		try (PrintWriter writer = new PrintWriter(new FileWriter("analyze_benchmarks.py"))) {
-			writer.println(script);
-			System.out.println("Python analysis script saved to: analyze_benchmarks.py");
-			System.out.println("Run with: python analyze_benchmarks.py");
+		try (PrintWriter writer = new PrintWriter(new FileWriter("plot_benchmarks.py"))) {
+			writer.print(script);
+			System.out.println("Generated: plot_benchmarks.py");
 		} catch (IOException e) {
-			System.err.println("Error saving Python script: " + e.getMessage());
+			System.err.println("Error generating Python script: " + e.getMessage());
 		}
 	}
 	
 	/**
-	 * Generate an R script for statistical analysis and plotting
+	 * Generate an R script to create plots from benchmark CSV files
 	 */
 	public static void generateRPlotScript() {
 		String script = """
-# BART Benchmark Analysis in R
 # Load required libraries
 library(ggplot2)
 library(dplyr)
-library(readr)
 library(gridExtra)
-library(scales)
 
-# Function to load and analyze benchmark data
-analyze_benchmark <- function(csv_file, metric_name, title) {
-  if (!file.exists(csv_file)) {
-    cat("File", csv_file, "not found. Run benchmarks first.\\n")
+# Set theme for publication-quality plots
+theme_set(theme_minimal() + theme(
+  plot.title = element_text(size = 14, face = "bold"),
+  axis.title = element_text(size = 12),
+  axis.text = element_text(size = 10),
+  legend.text = element_text(size = 10)
+))
+
+# Function to load and plot benchmark data
+load_and_plot_benchmark <- function(csv_file, metric_name, title) {
+  tryCatch({
+    # Load data
+    df <- read.csv(csv_file)
+    
+    # Create plot
+    p <- ggplot(df, aes_string(x = names(df)[1], y = "Time_us")) +
+      geom_line(color = "blue", size = 1.2) +
+      geom_point(color = "blue", size = 3) +
+      geom_smooth(method = "lm", se = TRUE, alpha = 0.3, color = "red", linetype = "dashed") +
+      labs(
+        title = paste(title, "- Execution Time vs", metric_name),
+        x = metric_name,
+        y = "Execution Time (μs)"
+      ) +
+      theme(panel.grid = element_line(alpha = 0.3))
+    
+    # Print statistics
+    cat("\\n", title, "Statistics:\\n")
+    cat("Time range:", round(min(df$Time_us), 2), "-", round(max(df$Time_us), 2), "μs\\n")
+    cat("Average time:", round(mean(df$Time_us), 2), "μs\\n")
+    cat("Scaling factor:", round(max(df$Time_us) / min(df$Time_us), 2), "x\\n")
+    
+    # Calculate correlation coefficient
+    correlation <- cor(df[,1], df$Time_us)
+    cat("Correlation coefficient:", round(correlation, 3), "\\n")
+    
+    return(p)
+  }, error = function(e) {
+    cat("Error plotting", csv_file, ":", e$message, "\\n")
     return(NULL)
-  }
-  
-  # Load data
-  df <- read_csv(csv_file, show_col_types = FALSE)
-  metric_col <- names(df)[1]
-  
-  # Create performance plots
-  p1 <- ggplot(df, aes(x = .data[[metric_col]])) +
-    geom_line(aes(y = Optimal_us, color = "Optimal"), size = 1.2) +
-    geom_point(aes(y = Optimal_us, color = "Optimal"), size = 3) +
-    geom_line(aes(y = Average_us, color = "Average"), size = 1.2) +
-    geom_point(aes(y = Average_us, color = "Average"), size = 3) +
-    geom_line(aes(y = Worst_us, color = "Worst"), size = 1.2) +
-    geom_point(aes(y = Worst_us, color = "Worst"), size = 3) +
-    labs(
-      title = paste(title, "- Execution Time"),
-      x = metric_name,
-      y = "Execution Time (μs)",
-      color = "Scenario"
-    ) +
-    theme_minimal() +
-    theme(
-      plot.title = element_text(size = 14, face = "bold"),
-      axis.title = element_text(size = 12),
-      legend.title = element_text(size = 11),
-      legend.text = element_text(size = 10)
-    ) +
-    scale_color_manual(values = c("Optimal" = "#2E8B57", "Average" = "#4682B4", "Worst" = "#DC143C"))
-  
-  # Performance ratio plot
-  df$ratio <- df$Worst_us / df$Optimal_us
-  
-  p2 <- ggplot(df, aes(x = .data[[metric_col]], y = ratio)) +
-    geom_line(color = "#DC143C", size = 1.2) +
-    geom_point(color = "#DC143C", size = 3) +
-    geom_smooth(method = "lm", se = TRUE, alpha = 0.2, color = "#8B0000") +
-    labs(
-      title = paste(title, "- Performance Degradation"),
-      x = metric_name,
-      y = "Performance Ratio (Worst/Optimal)"
-    ) +
-    theme_minimal() +
-    theme(
-      plot.title = element_text(size = 14, face = "bold"),
-      axis.title = element_text(size = 12)
+  })
+}
+
+# Function to create combined comparison plot
+create_combined_plot <- function() {
+  tryCatch({
+    # Load all benchmark data
+    policies_df <- read.csv("policies_benchmark.csv")
+    attributes_df <- read.csv("attributes_benchmark.csv")
+    exchanges_df <- read.csv("exchanges_benchmark.csv")
+    
+    # Normalize function
+    normalize_series <- function(x) {
+      (x - min(x)) / (max(x) - min(x))
+    }
+    
+    # Create normalized comparison data
+    max_len <- min(nrow(policies_df), nrow(attributes_df), nrow(exchanges_df))
+    
+    combined_df <- data.frame(
+      x_norm = rep(seq(0, 1, length.out = max_len), 3),
+      time_norm = c(
+        normalize_series(policies_df$Time_us[1:max_len]),
+        normalize_series(attributes_df$Time_us[1:max_len]),
+        normalize_series(exchanges_df$Time_us[1:max_len])
+      ),
+      metric = rep(c("Policies", "Attributes", "Exchanges"), each = max_len)
     )
-  
-  # Combine plots
-  combined_plot <- grid.arrange(p1, p2, ncol = 2)
-  
-  # Save plot
-  plot_filename <- gsub(".csv", "_analysis.png", csv_file)
-  ggsave(plot_filename, combined_plot, width = 15, height = 6, dpi = 300)
-  
-  # Print statistics
-  cat("\\n=== ", title, " Analysis ===\\n")
-  cat("Range:", min(df[[metric_col]]), "to", max(df[[metric_col]]), tolower(metric_name), "\\n")
-  cat("Optimal time range:", round(min(df$Optimal_us), 2), "-", round(max(df$Optimal_us), 2), "μs\\n")
-  cat("Worst time range:", round(min(df$Worst_us), 2), "-", round(max(df$Worst_us), 2), "μs\\n")
-  cat("Max performance ratio:", round(max(df$ratio), 2), "x\\n")
-  cat("Average performance ratio:", round(mean(df$ratio), 2), "x\\n")
-  
-  return(df)
+    
+    # Create comparison plot
+    p <- ggplot(combined_df, aes(x = x_norm, y = time_norm, color = metric)) +
+      geom_line(size = 1.2) +
+      geom_point(size = 3) +
+      labs(
+        title = "BART Performance Scaling Comparison",
+        x = "Normalized Metric Range (0-1)",
+        y = "Normalized Execution Time (0-1)",
+        color = "Metric Type"
+      ) +
+      scale_color_manual(values = c("Policies" = "blue", "Attributes" = "green", "Exchanges" = "red")) +
+      theme(panel.grid = element_line(alpha = 0.3))
+    
+    return(p)
+  }, error = function(e) {
+    cat("Error creating combined plot:", e$message, "\\n")
+    return(NULL)
+  })
 }
 
-# Analyze each benchmark type
-policies_df <- analyze_benchmark("policies_benchmark.csv", "Number of Policies", "Policy Count Impact")
-attributes_df <- analyze_benchmark("attributes_benchmark.csv", "Number of Attributes", "Attribute Count Impact")
-exchanges_df <- analyze_benchmark("exchanges_benchmark.csv", "Number of Exchanges", "Exchange Count Impact")
+# Generate all plots
+cat("Generating BART Performance Analysis Plots...\\n")
 
-# Create comparison plot
-if (!is.null(policies_df) && !is.null(attributes_df) && !is.null(exchanges_df)) {
-  # Normalize data for comparison
-  normalize <- function(x) (x - min(x)) / (max(x) - min(x))
-  
-  comparison_df <- data.frame(
-    metric_normalized = c(normalize(policies_df[[1]]), normalize(attributes_df[[1]]), normalize(exchanges_df[[1]])),
-    time_normalized = c(normalize(policies_df$Worst_us), normalize(attributes_df$Worst_us), normalize(exchanges_df$Worst_us)),
-    benchmark_type = factor(rep(c("Policy Count", "Attribute Count", "Exchange Count"), 
-                               c(nrow(policies_df), nrow(attributes_df), nrow(exchanges_df))))
-  )
-  
-  comparison_plot <- ggplot(comparison_df, aes(x = metric_normalized, y = time_normalized, color = benchmark_type)) +
-    geom_line(size = 1.5) +
-    geom_point(size = 3) +
-    labs(
-      title = "BART Performance Comparison - Worst Case Scenarios",
-      x = "Normalized Metric Value",
-      y = "Normalized Execution Time",
-      color = "Benchmark Type"
-    ) +
-    theme_minimal() +
-    theme(
-      plot.title = element_text(size = 16, face = "bold"),
-      axis.title = element_text(size = 13),
-      legend.title = element_text(size = 12),
-      legend.text = element_text(size = 11)
-    ) +
-    scale_color_manual(values = c("#2E8B57", "#4682B4", "#DC143C"))
-  
-  ggsave("bart_performance_comparison.png", comparison_plot, width = 12, height = 8, dpi = 300)
-  print(comparison_plot)
-  
-  cat("\\n", paste(rep("=", 60), collapse = ""), "\\n")
-  cat("SUMMARY INSIGHTS\\n")
-  cat(paste(rep("=", 60), collapse = ""), "\\n")
-  cat("1. Check which metric shows the steepest performance growth\\n")
-  cat("2. Analyze linearity vs exponential growth patterns\\n") 
-  cat("3. Compare optimal vs worst-case performance gaps\\n")
-  cat("4. Identify the most performance-critical metric\\n")
-  cat("\\nAll plots saved as high-resolution PNG files.\\n")
+# Individual plots
+p1 <- load_and_plot_benchmark("policies_benchmark.csv", "Number of Policies", "Policy Scaling")
+p2 <- load_and_plot_benchmark("attributes_benchmark.csv", "Number of Attributes", "Attribute Scaling")
+p3 <- load_and_plot_benchmark("exchanges_benchmark.csv", "Number of Exchanges", "Exchange Scaling")
+
+# Combined plot
+p4 <- create_combined_plot()
+
+# Save plots
+if (!is.null(p1)) {
+  ggsave("policies_performance.png", p1, width = 10, height = 6, dpi = 300)
 }
+if (!is.null(p2)) {
+  ggsave("attributes_performance.png", p2, width = 10, height = 6, dpi = 300)
+}
+if (!is.null(p3)) {
+  ggsave("exchanges_performance.png", p3, width = 10, height = 6, dpi = 300)
+}
+if (!is.null(p4)) {
+  ggsave("combined_performance.png", p4, width = 12, height = 8, dpi = 300)
+}
+
+# Display plots
+if (!is.null(p1) && !is.null(p2) && !is.null(p3)) {
+  grid.arrange(p1, p2, p3, ncol = 2)
+}
+
+if (!is.null(p4)) {
+  print(p4)
+}
+
+cat("Plots saved as PNG files.\\n")
 """;
 		
-		try (PrintWriter writer = new PrintWriter(new FileWriter("analyze_benchmarks.R"))) {
-			writer.println(script);
-			System.out.println("R analysis script saved to: analyze_benchmarks.R");
-			System.out.println("Run with: Rscript analyze_benchmarks.R");
+		try (PrintWriter writer = new PrintWriter(new FileWriter("plot_benchmarks.R"))) {
+			writer.print(script);
+			System.out.println("Generated: plot_benchmarks.R");
 		} catch (IOException e) {
-			System.err.println("Error saving R script: " + e.getMessage());
+			System.err.println("Error generating R script: " + e.getMessage());
 		}
 	}
 	
 	/**
-	 * Generate a comprehensive LaTeX table for research paper inclusion
+	 * Generate a LaTeX table template for including benchmark results in papers
 	 */
-	public static void generateLatexTable(String csvFile, String caption, String label) {
-		try {
-			System.out.println("\\n% LaTeX table for " + caption);
-			System.out.println("\\begin{table}[htbp]");
-			System.out.println("\\centering");
-			System.out.println("\\caption{" + caption + "}");
-			System.out.println("\\label{" + label + "}");
-			System.out.println("\\begin{tabular}{|r|r|r|r|r|}");
-			System.out.println("\\hline");
-			System.out.println("\\textbf{Metric} & \\textbf{Optimal ($\\mu$s)} & \\textbf{Average ($\\mu$s)} & \\textbf{Worst ($\\mu$s)} & \\textbf{Ratio} \\\\");
-			System.out.println("\\hline");
-			
-			// Note: In a real implementation, you'd read the CSV file here
-			System.out.println("% Add data rows from " + csvFile);
-			System.out.println("% Example: 10 & 15.23 & 28.45 & 67.89 & 4.46 \\\\");
-			
-			System.out.println("\\hline");
-			System.out.println("\\end{tabular}");
-			System.out.println("\\end{table}");
-			
-		} catch (Exception e) {
-			System.err.println("Error generating LaTeX table: " + e.getMessage());
+	public static void generateLatexTable() {
+		String template = """
+% LaTeX table template for BART benchmark results
+% Include this in your paper and replace with actual data
+
+\\begin{table}[htbp]
+\\centering
+\\caption{BART Performance Benchmark Results}
+\\label{tab:bart-performance}
+\\begin{tabular}{|l|r|r|r|}
+\\hline
+\\textbf{Metric} & \\textbf{Range} & \\textbf{Time Range (μs)} & \\textbf{Scaling} \\\\
+\\hline
+Policies & 1-1000 & X.XX - X,XXX.XX & Linear (O(n)) \\\\
+Attributes & 1-100 & X.XX - XXX.XX & Constant (O(1)) \\\\
+Exchanges & 1-100 & X.XX - XXX.XX & Moderate (O(k)) \\\\
+\\hline
+\\end{tabular}
+\\end{table}
+
+% Usage instructions:
+% 1. Run the benchmark: mvn exec:java -Dexec.mainClass="bart.core.benchmarks.ExtendedBenchmark"
+% 2. Replace X.XX values with actual results from CSV files
+% 3. Include in your LaTeX document's table section
+% 4. Reference with \\ref{tab:bart-performance}
+""";
+		
+		try (PrintWriter writer = new PrintWriter(new FileWriter("benchmark_table.tex"))) {
+			writer.print(template);
+			System.out.println("Generated: benchmark_table.tex");
+		} catch (IOException e) {
+			System.err.println("Error generating LaTeX template: " + e.getMessage());
 		}
 	}
 	
 	/**
-	 * Generate analysis scripts and documentation
+	 * Generate all analysis tools
 	 */
 	public static void generateAllAnalysisTools() {
-		System.out.println("Generating analysis tools for BART benchmarks...");
-		
 		generatePythonPlotScript();
 		generateRPlotScript();
-		
-		System.out.println("\nGenerated analysis tools:");
-		System.out.println("- analyze_benchmarks.py (Python with matplotlib)");
-		System.out.println("- analyze_benchmarks.R (R with ggplot2)");
+		generateLatexTable();
+		System.out.println("\nAnalysis tools generated:");
+		System.out.println("- plot_benchmarks.py (Python matplotlib)");
+		System.out.println("- plot_benchmarks.R (R ggplot2)");
+		System.out.println("- benchmark_table.tex (LaTeX table template)");
 		System.out.println("\nTo use:");
-		System.out.println("1. Run benchmarks to generate CSV files");
-		System.out.println("2. Run: python analyze_benchmarks.py OR Rscript analyze_benchmarks.R");
-		System.out.println("3. Check generated PNG files for publication-ready plots");
-		
-		// Generate example LaTeX tables
-		generateLatexTable("policies_benchmark.csv", 
-			"BART Performance vs Number of Policies", "tab:policy-performance");
-		generateLatexTable("attributes_benchmark.csv", 
-			"BART Performance vs Number of Attributes", "tab:attribute-performance");
-		generateLatexTable("exchanges_benchmark.csv", 
-			"BART Performance vs Number of Exchanges", "tab:exchange-performance");
-	}
-	
-	/**
-	 * Main method to run the analysis tools generator
-	 */
-	public static void main(String[] args) {
-		generateAllAnalysisTools();
+		System.out.println("  Python: python plot_benchmarks.py");
+		System.out.println("  R: Rscript plot_benchmarks.R");
 	}
 }

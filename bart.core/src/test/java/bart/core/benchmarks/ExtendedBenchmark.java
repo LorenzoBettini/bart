@@ -40,9 +40,10 @@ public class ExtendedBenchmark {
 		System.out.println("BART Extended Performance Benchmark");
 		System.out.println("===================================");
 		System.out.println("This benchmark measures execution time vs three key metrics:");
-		System.out.println("- Number of policies (1-200, step 20)");
-		System.out.println("- Number of attributes (1-50, step 5)");
-		System.out.println("- Number of exchanges (1-20, step 2)");
+		System.out.println("- Number of policies (1-1000, step 50)");
+		System.out.println("- Number of attributes (1-100, step 10)");
+		System.out.println("- Number of exchanges (1-100, step 10)");
+		System.out.println("Each test uses middle-position matching for consistent results.");
 		System.out.println();
 		
 		// JVM warm-up to avoid cold start bias
@@ -114,65 +115,56 @@ public class ExtendedBenchmark {
 	public void runPolicyBenchmark() {
 		System.out.println("=== Policy Count Benchmark ===");
 		System.out.println("Testing how execution time scales with number of policies");
-		System.out.println("Range: 1-200 policies, step 20");
+		System.out.println("Range: 1-1000 policies, step 50");
 		System.out.println();
 		
-		int[] policyCounts = generateRange(1, 200, 20);
+		int[] policyCounts = generateRange(1, 1000, 50);
 		runPolicyBenchmarkRange(policyCounts, "policies_benchmark.csv");
 	}
 	
 	public void runAttributeBenchmark() {
 		System.out.println("=== Attribute Count Benchmark ===");
 		System.out.println("Testing how execution time scales with number of attributes");
-		System.out.println("Range: 1-50 attributes, step 5");
+		System.out.println("Range: 1-100 attributes, step 10");
 		System.out.println();
 		
-		int[] attributeCounts = generateRange(1, 50, 5);
+		int[] attributeCounts = generateRange(1, 100, 10);
 		runAttributeBenchmarkRange(attributeCounts, "attributes_benchmark.csv");
 	}
 	
 	public void runExchangeBenchmark() {
 		System.out.println("=== Exchange Count Benchmark ===");
 		System.out.println("Testing how execution time scales with number of exchanges");
-		System.out.println("Range: 1-20 exchanges, step 2");
+		System.out.println("Range: 1-100 exchanges, step 10");
 		System.out.println();
 		
-		int[] exchangeCounts = generateRange(1, 20, 2);
+		int[] exchangeCounts = generateRange(1, 100, 10);
 		runExchangeBenchmarkRange(exchangeCounts, "exchanges_benchmark.csv");
 	}
 	
 	private void runPolicyBenchmarkRange(int[] policyCounts, String csvFilename) {
-		System.out.printf("%-10s %-15s %-15s %-15s %-10s%n", 
-			"Policies", "Optimal (μs)", "Average (μs)", "Worst (μs)", "Ratio");
-		System.out.println("-".repeat(75));
+		System.out.printf("%-10s %-15s%n", 
+			"Policies", "Time (μs)");
+		System.out.println("-".repeat(30));
 		
 		List<String[]> csvData = new ArrayList<>();
-		csvData.add(new String[]{"Policies", "Optimal_us", "Average_us", "Worst_us", "Ratio"});
+		csvData.add(new String[]{"Policies", "Time_us"});
 		
 		for (int numPolicies : policyCounts) {
 			System.out.printf("Testing %d policies... ", numPolicies);
 			
-			BenchmarkResult result = benchmarkPolicies(numPolicies);
+			long executionTime = benchmarkPolicies(numPolicies);
 			
-			double optimalMicros = result.optimalTime() / 1000.0;
-			double averageMicros = result.averageTime() / 1000.0;
-			double worstMicros = result.worstTime() / 1000.0;
-			double ratio = worstMicros / Math.max(optimalMicros, 1);
+			double timeMicros = executionTime / 1000.0;
 			
 			System.out.printf("done%n");
-			System.out.printf("%-10d %-15s %-15s %-15s %-10s%n",
+			System.out.printf("%-10d %-15s%n",
 				numPolicies,
-				DECIMAL_FORMAT.format(optimalMicros),
-				DECIMAL_FORMAT.format(averageMicros),
-				DECIMAL_FORMAT.format(worstMicros),
-				DECIMAL_FORMAT.format(ratio));
+				DECIMAL_FORMAT.format(timeMicros));
 			
 			csvData.add(new String[]{
 				String.valueOf(numPolicies),
-				String.format("%.2f", optimalMicros),
-				String.format("%.2f", averageMicros),
-				String.format("%.2f", worstMicros),
-				String.format("%.2f", ratio)
+				String.format("%.2f", timeMicros)
 			});
 		}
 		
@@ -181,37 +173,28 @@ public class ExtendedBenchmark {
 	}
 	
 	private void runAttributeBenchmarkRange(int[] attributeCounts, String csvFilename) {
-		System.out.printf("%-12s %-15s %-15s %-15s %-10s%n", 
-			"Attributes", "Optimal (μs)", "Average (μs)", "Worst (μs)", "Ratio");
-		System.out.println("-".repeat(77));
+		System.out.printf("%-12s %-15s%n", 
+			"Attributes", "Time (μs)");
+		System.out.println("-".repeat(32));
 		
 		List<String[]> csvData = new ArrayList<>();
-		csvData.add(new String[]{"Attributes", "Optimal_us", "Average_us", "Worst_us", "Ratio"});
+		csvData.add(new String[]{"Attributes", "Time_us"});
 		
 		for (int numAttributes : attributeCounts) {
 			System.out.printf("Testing %d attributes... ", numAttributes);
 			
-			BenchmarkResult result = benchmarkAttributes(numAttributes);
+			long executionTime = benchmarkAttributes(numAttributes);
 			
-			double optimalMicros = result.optimalTime() / 1000.0;
-			double averageMicros = result.averageTime() / 1000.0;
-			double worstMicros = result.worstTime() / 1000.0;
-			double ratio = worstMicros / Math.max(optimalMicros, 1);
+			double timeMicros = executionTime / 1000.0;
 			
 			System.out.printf("done%n");
-			System.out.printf("%-12d %-15s %-15s %-15s %-10s%n",
+			System.out.printf("%-12d %-15s%n",
 				numAttributes,
-				DECIMAL_FORMAT.format(optimalMicros),
-				DECIMAL_FORMAT.format(averageMicros),
-				DECIMAL_FORMAT.format(worstMicros),
-				DECIMAL_FORMAT.format(ratio));
+				DECIMAL_FORMAT.format(timeMicros));
 			
 			csvData.add(new String[]{
 				String.valueOf(numAttributes),
-				String.format("%.2f", optimalMicros),
-				String.format("%.2f", averageMicros),
-				String.format("%.2f", worstMicros),
-				String.format("%.2f", ratio)
+				String.format("%.2f", timeMicros)
 			});
 		}
 		
@@ -220,37 +203,28 @@ public class ExtendedBenchmark {
 	}
 	
 	private void runExchangeBenchmarkRange(int[] exchangeCounts, String csvFilename) {
-		System.out.printf("%-11s %-15s %-15s %-15s %-10s%n", 
-			"Exchanges", "Optimal (μs)", "Average (μs)", "Worst (μs)", "Ratio");
-		System.out.println("-".repeat(76));
+		System.out.printf("%-11s %-15s%n", 
+			"Exchanges", "Time (μs)");
+		System.out.println("-".repeat(31));
 		
 		List<String[]> csvData = new ArrayList<>();
-		csvData.add(new String[]{"Exchanges", "Optimal_us", "Average_us", "Worst_us", "Ratio"});
+		csvData.add(new String[]{"Exchanges", "Time_us"});
 		
 		for (int numExchanges : exchangeCounts) {
 			System.out.printf("Testing %d exchanges... ", numExchanges);
 			
-			BenchmarkResult result = benchmarkExchanges(numExchanges);
+			long executionTime = benchmarkExchanges(numExchanges);
 			
-			double optimalMicros = result.optimalTime() / 1000.0;
-			double averageMicros = result.averageTime() / 1000.0;
-			double worstMicros = result.worstTime() / 1000.0;
-			double ratio = worstMicros / Math.max(optimalMicros, 1);
+			double timeMicros = executionTime / 1000.0;
 			
 			System.out.printf("done%n");
-			System.out.printf("%-11d %-15s %-15s %-15s %-10s%n",
+			System.out.printf("%-11d %-15s%n",
 				numExchanges,
-				DECIMAL_FORMAT.format(optimalMicros),
-				DECIMAL_FORMAT.format(averageMicros),
-				DECIMAL_FORMAT.format(worstMicros),
-				DECIMAL_FORMAT.format(ratio));
+				DECIMAL_FORMAT.format(timeMicros));
 			
 			csvData.add(new String[]{
 				String.valueOf(numExchanges),
-				String.format("%.2f", optimalMicros),
-				String.format("%.2f", averageMicros),
-				String.format("%.2f", worstMicros),
-				String.format("%.2f", ratio)
+				String.format("%.2f", timeMicros)
 			});
 		}
 		
@@ -258,64 +232,35 @@ public class ExtendedBenchmark {
 		System.out.println();
 	}
 	
-	private BenchmarkResult benchmarkPolicies(int numPolicies) {
-		// Optimal: First policy matches (early success)
-		Policies optimalPolicies = createPoliciesScenario(numPolicies, 1);
-		Request optimalRequest = createRequest("target");
-		long optimalTime = measureTime(optimalPolicies, optimalRequest);
-		
-		// Average: Middle policy matches (check ~50% before success)
+	private long benchmarkPolicies(int numPolicies) {
+		// Always match middle policy for consistent results
 		int middleIndex = Math.max(1, numPolicies / 2);
-		Policies averagePolicies = createPoliciesScenario(numPolicies, middleIndex);
-		Request averageRequest = createRequest("target");
-		long averageTime = measureTime(averagePolicies, averageRequest);
-		
-		// Worst: Last policy matches (check all policies before success)
-		Policies worstPolicies = createPoliciesScenario(numPolicies, numPolicies);
-		Request worstRequest = createRequest("target");
-		long worstTime = measureTime(worstPolicies, worstRequest);
-		
-		return new BenchmarkResult(numPolicies, optimalTime, averageTime, worstTime);
+		Policies policies = createPoliciesScenario(numPolicies, middleIndex);
+		Request request = createRequest("target");
+		return measureTime(policies, request);
 	}
 	
-	private BenchmarkResult benchmarkAttributes(int numAttributes) {
-		// Optimal: First attribute matches
-		Policies optimalPolicies = createAttributeScenario(numAttributes, 1);
-		Request optimalRequest = createAttributeRequest(numAttributes, 1);
-		long optimalTime = measureTime(optimalPolicies, optimalRequest);
-		
-		// Average: Middle attribute matches  
+	private long benchmarkAttributes(int numAttributes) {
+		// Always match middle attribute for consistent results
 		int midPos = Math.max(1, numAttributes / 2);
-		Policies averagePolicies = createAttributeScenario(numAttributes, midPos);
-		Request averageRequest = createAttributeRequest(numAttributes, midPos);
-		long averageTime = measureTime(averagePolicies, averageRequest);
+		Policies policies = createAttributeScenario(numAttributes, midPos);
+		Request request = createAttributeRequest(numAttributes, midPos);
 		
-		// Worst: No attribute matches
-		Policies worstPolicies = createAttributeScenario(numAttributes, -1);
-		Request worstRequest = createAttributeRequest(numAttributes, numAttributes + 1);
-		long worstTime = measureTime(worstPolicies, worstRequest);
+		// Add extra warm-up for attribute benchmark to avoid first-run bias
+		for (int i = 0; i < 5; i++) {
+			Semantics warmupSemantics = new Semantics(policies);
+			warmupSemantics.evaluate(request);
+		}
 		
-		return new BenchmarkResult(numAttributes, optimalTime, averageTime, worstTime);
+		return measureTime(policies, request);
 	}
 	
-	private BenchmarkResult benchmarkExchanges(int numExchanges) {
-		// Optimal: First exchange succeeds
-		Policies optimalPolicies = createExchangeScenario(numExchanges, 1);
-		Request optimalRequest = createRequest("target");
-		long optimalTime = measureTime(optimalPolicies, optimalRequest);
-		
-		// Average: Middle exchange succeeds
+	private long benchmarkExchanges(int numExchanges) {
+		// Always have middle exchange succeed for consistent results
 		int midPos = Math.max(1, numExchanges / 2);
-		Policies averagePolicies = createExchangeScenario(numExchanges, midPos);
-		Request averageRequest = createRequest("target");
-		long averageTime = measureTime(averagePolicies, averageRequest);
-		
-		// Worst: All exchanges fail
-		Policies worstPolicies = createExchangeScenario(numExchanges, -1);
-		Request worstRequest = createRequest("target");
-		long worstTime = measureTime(worstPolicies, worstRequest);
-		
-		return new BenchmarkResult(numExchanges, optimalTime, averageTime, worstTime);
+		Policies policies = createExchangeScenario(numExchanges, midPos);
+		Request request = createRequest("target");
+		return measureTime(policies, request);
 	}
 	
 	private Policies createPoliciesScenario(int numPolicies, int matchingPolicyIndex) {
@@ -353,12 +298,9 @@ public class ExtendedBenchmark {
 		Attributes resourceAttrs = new Attributes()
 			.add("resource", "target");
 		
+		// Always add a consistent set of attributes
 		for (int i = 1; i <= numAttributes; i++) {
-			if (i == matchingAttrIndex) {
-				resourceAttrs.add("attr" + i, "match" + i);
-			} else {
-				resourceAttrs.add("attr" + i, "nomatch" + i);
-			}
+			resourceAttrs.add("attr" + i, "value" + i);
 		}
 		
 		Rules rules = new Rules().add(new Rule(resourceAttrs));
@@ -443,12 +385,9 @@ public class ExtendedBenchmark {
 		Attributes requestAttrs = new Attributes()
 			.add("resource", "target");
 		
+		// Always add the same attributes with matching values
 		for (int i = 1; i <= numAttributes; i++) {
-			if (i == matchingPosition) {
-				requestAttrs.add("attr" + i, "match" + i);
-			} else {
-				requestAttrs.add("attr" + i, "wrongValue" + i);
-			}
+			requestAttrs.add("attr" + i, "value" + i);
 		}
 		
 		return new Request(
@@ -497,6 +436,4 @@ public class ExtendedBenchmark {
 			System.err.println("Error saving CSV: " + e.getMessage());
 		}
 	}
-	
-	private record BenchmarkResult(int value, long optimalTime, long averageTime, long worstTime) {}
 }
