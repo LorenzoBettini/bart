@@ -19,33 +19,46 @@ This benchmarking suite measures the performance characteristics of the BART pol
 
 ## Quick Start
 
-### 1. Run Quick Test (Recommended for First Time)
+### Option A: Using Maven (Recommended)
+
+```bash
+# From the bart.core directory - compile first
+mvn compile test-compile
+
+# Quick benchmark test
+mvn exec:java@benchmark-quick
+
+# Complete benchmarks for research paper
+mvn exec:java@benchmark-all
+
+# Individual metrics
+mvn exec:java@benchmark-policies
+mvn exec:java@benchmark-attributes  
+mvn exec:java@benchmark-exchanges
+
+# Generate analysis tools (Python/R scripts, LaTeX templates)
+mvn exec:java@benchmark-analyzer
+```
+
+### Option B: Direct Java Execution
 
 ```bash
 # From the bart.core directory
+# 1. Quick test
 java -cp target/classes:target/test-classes bart.core.benchmarks.SimpleBenchmark
-```
 
-### 2. Run Complete Benchmarks (For Research Paper)
-
-```bash
-# All metrics with full ranges
+# 2. Complete benchmarks
 java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark all
 
-# Individual metrics
+# 3. Individual metrics
 java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark policies
 java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark attributes
 java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark exchanges
 
-# Quick test with smaller ranges
+# 4. Quick test with smaller ranges
 java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark quick
-```
 
-### 3. Generate Analysis Tools
-
-```bash
-# Analysis tools are automatically generated after benchmarks
-# Or generate them separately:
+# 5. Generate analysis tools
 java -cp target/classes:target/test-classes bart.core.benchmarks.BenchmarkAnalyzer
 ```
 

@@ -341,4 +341,11 @@ if (!is.null(policies_df) && !is.null(attributes_df) && !is.null(exchanges_df)) 
 		generateLatexTable("exchanges_benchmark.csv", 
 			"BART Performance vs Number of Exchanges", "tab:exchange-performance");
 	}
+	
+	/**
+	 * Main method to run the analysis tools generator
+	 */
+	public static void main(String[] args) {
+		generateAllAnalysisTools();
+	}
 }

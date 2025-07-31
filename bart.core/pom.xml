@@ -26,4 +26,92 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<configuration>
+					<includePluginDependencies>true</includePluginDependencies>
+					<includeProjectDependencies>true</includeProjectDependencies>
+					<classpathScope>test</classpathScope>
+				</configuration>
+				<executions>
+					<!-- Quick benchmark -->
+					<execution>
+						<id>benchmark-quick</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>bart.core.benchmarks.SimpleBenchmark</mainClass>
+						</configuration>
+					</execution>
+					<!-- Extended benchmark - all metrics -->
+					<execution>
+						<id>benchmark-all</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>bart.core.benchmarks.ExtendedBenchmark</mainClass>
+							<arguments>
+								<argument>all</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<!-- Extended benchmark - policies only -->
+					<execution>
+						<id>benchmark-policies</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>bart.core.benchmarks.ExtendedBenchmark</mainClass>
+							<arguments>
+								<argument>policies</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<!-- Extended benchmark - attributes only -->
+					<execution>
+						<id>benchmark-attributes</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>bart.core.benchmarks.ExtendedBenchmark</mainClass>
+							<arguments>
+								<argument>attributes</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<!-- Extended benchmark - exchanges only -->
+					<execution>
+						<id>benchmark-exchanges</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>bart.core.benchmarks.ExtendedBenchmark</mainClass>
+							<arguments>
+								<argument>exchanges</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<!-- Generate analysis tools -->
+					<execution>
+						<id>benchmark-analyzer</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>bart.core.benchmarks.BenchmarkAnalyzer</mainClass>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>
