@@ -17,6 +17,25 @@ This benchmarking suite measures the performance characteristics of the BART pol
 - **Publication-Ready Output**: CSV data and visualization scripts
 - **Multiple Interfaces**: JUnit tests, standalone runners, and CLI tools
 
+## Prerequisites
+
+### Required for Basic Benchmarks
+- Java 21+
+- Maven 3.6+
+
+### Required for Analysis/Visualization (Optional)
+```bash
+# Python packages (for analyze_benchmarks.py)
+python3 -m pip install pandas matplotlib seaborn numpy
+
+# Or use requirements file:
+python3 -m pip install -r requirements.txt
+
+# R packages (for analyze_benchmarks.R)
+# In R console:
+install.packages(c("ggplot2", "dplyr", "readr", "gridExtra", "scales"))
+```
+
 ## Quick Start
 
 ### Option A: Using Maven (Recommended)
@@ -123,12 +142,12 @@ java -cp target/classes:target/test-classes bart.core.benchmarks.SimpleBenchmark
 ```
 
 ### Run Visualization
-After generating CSV files:
+After generating CSV files (requires packages from Prerequisites section):
 ```bash
-# Using Python
-python analyze_benchmarks.py
+# Using Python (requires: pandas, matplotlib, seaborn, numpy)
+python3 analyze_benchmarks.py
 
-# Using R
+# Using R (requires: ggplot2, dplyr, readr, gridExtra, scales)
 Rscript analyze_benchmarks.R
 ```
 
