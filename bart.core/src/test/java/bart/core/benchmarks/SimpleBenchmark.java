@@ -2,8 +2,6 @@ package bart.core.benchmarks;
 
 import static bart.core.Participants.anySuchThat;
 import static bart.core.Participants.index;
-import static bart.core.Participants.me;
-import static bart.core.Participants.requester;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,14 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bart.core.Attributes;
-import bart.core.OrExchange;
 import bart.core.Policies;
 import bart.core.Policy;
 import bart.core.Request;
 import bart.core.Result;
 import bart.core.Rule;
 import bart.core.Rules;
-import bart.core.SingleExchange;
 import bart.core.semantics.Semantics;
 
 /**

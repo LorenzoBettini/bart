@@ -3,7 +3,6 @@ package bart.core.benchmarks;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * Utility class for generating analysis reports and plotting scripts from benchmark results.
