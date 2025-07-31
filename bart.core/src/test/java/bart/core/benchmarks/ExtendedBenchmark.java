@@ -45,6 +45,12 @@ public class ExtendedBenchmark {
 		System.out.println("- Number of exchanges (1-20, step 2)");
 		System.out.println();
 		
+		// JVM warm-up to avoid cold start bias
+		System.out.println("Warming up JVM...");
+		benchmark.warmUpJvm();
+		System.out.println("Warm-up complete. Starting benchmarks...");
+		System.out.println();
+		
 		String mode = args.length > 0 ? args[0] : "all";
 		
 		switch (mode.toLowerCase()) {
@@ -58,6 +64,32 @@ public class ExtendedBenchmark {
 		// Generate analysis tools
 		System.out.println("\nGenerating analysis tools...");
 		BenchmarkAnalyzer.generateAllAnalysisTools();
+	}
+	
+	/**
+	 * Warm up the JVM to avoid cold start bias in benchmark measurements.
+	 * Runs several iterations with typical scenarios to trigger JIT compilation.
+	 */
+	private void warmUpJvm() {
+		// Create typical scenarios for warm-up
+		Policies warmupPolicies = createPoliciesScenario(10, 5);
+		Request warmupRequest = createRequest("target");
+		
+		// Run multiple warm-up iterations
+		for (int i = 0; i < 20; i++) {
+			Semantics semantics = new Semantics(warmupPolicies);
+			semantics.evaluate(warmupRequest);
+		}
+		
+		// Force garbage collection to clean up warm-up objects
+		System.gc();
+		
+		// Small delay to let GC complete
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 	
 	public void runAllBenchmarks() {
@@ -227,19 +259,20 @@ public class ExtendedBenchmark {
 	}
 	
 	private BenchmarkResult benchmarkPolicies(int numPolicies) {
-		// Optimal: First policy matches
+		// Optimal: First policy matches (early success)
 		Policies optimalPolicies = createPoliciesScenario(numPolicies, 1);
 		Request optimalRequest = createRequest("target");
 		long optimalTime = measureTime(optimalPolicies, optimalRequest);
 		
-		// Average: Middle policy matches
-		Policies averagePolicies = createPoliciesScenario(numPolicies, Math.max(1, numPolicies / 2));
+		// Average: Middle policy matches (check ~50% before success)
+		int middleIndex = Math.max(1, numPolicies / 2);
+		Policies averagePolicies = createPoliciesScenario(numPolicies, middleIndex);
 		Request averageRequest = createRequest("target");
 		long averageTime = measureTime(averagePolicies, averageRequest);
 		
-		// Worst: No policy matches (all must be evaluated)
-		Policies worstPolicies = createPoliciesScenario(numPolicies, -1);
-		Request worstRequest = createRequest("nonexistent");
+		// Worst: Last policy matches (check all policies before success)
+		Policies worstPolicies = createPoliciesScenario(numPolicies, numPolicies);
+		Request worstRequest = createRequest("target");
 		long worstTime = measureTime(worstPolicies, worstRequest);
 		
 		return new BenchmarkResult(numPolicies, optimalTime, averageTime, worstTime);
