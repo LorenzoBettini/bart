@@ -62,9 +62,7 @@ public class ExtendedBenchmark {
 			default -> benchmark.runAllBenchmarks();
 		}
 		
-		// Generate analysis tools
-		System.out.println("\nGenerating analysis tools...");
-		BenchmarkAnalyzer.generateAllAnalysisTools();
+		System.out.println("\nBenchmark complete! CSV files generated for analysis.");
 	}
 	
 	/**

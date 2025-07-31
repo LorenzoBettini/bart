@@ -56,7 +56,7 @@ public class SimpleBenchmark {
 		benchmark.runAttributeBenchmark();
 		benchmark.runExchangeBenchmark();
 		
-		System.out.println("\nSimple benchmark complete!");
+		System.out.println("\nSimple benchmark complete! CSV files generated.");
 		System.out.println("For comprehensive benchmarks, use ExtendedBenchmark.java");
 	}
 	
