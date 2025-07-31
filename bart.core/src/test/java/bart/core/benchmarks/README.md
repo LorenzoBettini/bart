@@ -19,28 +19,35 @@ This benchmarking suite measures the performance characteristics of the BART pol
 
 ## Quick Start
 
-### 1. Run Demo Benchmark
+### 1. Run Quick Test (Recommended for First Time)
 
 ```bash
 # From the bart.core directory
-java -cp target/test-classes:target/classes bart.core.benchmarks.BenchmarkMain demo
+java -cp target/classes:target/test-classes bart.core.benchmarks.SimpleBenchmark
 ```
 
-### 2. Run Quick Tests (Fast)
+### 2. Run Complete Benchmarks (For Research Paper)
 
 ```bash
-java -cp target/test-classes:target/classes bart.core.benchmarks.BenchmarkRunner quick
+# All metrics with full ranges
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark all
+
+# Individual metrics
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark policies
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark attributes
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark exchanges
+
+# Quick test with smaller ranges
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark quick
 ```
 
-### 3. Run Full Benchmarks (Comprehensive)
+### 3. Generate Analysis Tools
 
 ```bash
-java -cp target/test-classes:target/classes bart.core.benchmarks.BenchmarkMain full
+# Analysis tools are automatically generated after benchmarks
+# Or generate them separately:
+java -cp target/classes:target/test-classes bart.core.benchmarks.BenchmarkAnalyzer
 ```
-
-### 4. Run from IDE
-
-Execute the `BenchmarkTest` JUnit class in your IDE for integrated testing.
 
 ## Benchmark Configuration
 
@@ -75,21 +82,31 @@ Each measurement point is repeated 3 times and averaged for statistical reliabil
 
 ## Usage Examples
 
-### Individual Metric Benchmarks
+### Run Complete Benchmark Suite
 ```bash
-# Test only policy count scaling
-java bart.core.benchmarks.BenchmarkRunner policies
-
-# Test only attribute count scaling  
-java bart.core.benchmarks.BenchmarkRunner attributes
-
-# Test only exchange count scaling
-java bart.core.benchmarks.BenchmarkRunner exchanges
+# All three metrics with full research-paper ranges
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark all
 ```
 
-### Generate Analysis Tools Only
+### Individual Metric Benchmarks
 ```bash
-java bart.core.benchmarks.BenchmarkMain analyze
+# Test only policy count scaling (1-200, step 20)
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark policies
+
+# Test only attribute count scaling (1-50, step 5)
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark attributes
+
+# Test only exchange count scaling (1-20, step 2)
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark exchanges
+```
+
+### Quick Testing
+```bash
+# Smaller ranges for immediate feedback
+java -cp target/classes:target/test-classes bart.core.benchmarks.ExtendedBenchmark quick
+
+# Very quick test with minimal ranges
+java -cp target/classes:target/test-classes bart.core.benchmarks.SimpleBenchmark
 ```
 
 ### Run Visualization
@@ -171,22 +188,26 @@ Compare normalized plots to identify:
 ## Extending the Benchmarks
 
 ### Adding New Metrics
-1. Create test scenario generator in `BenchmarkRunner`
-2. Add measurement method following existing patterns
-3. Update CSV output and analysis scripts
+1. Add new benchmark method to `ExtendedBenchmark.java`
+2. Follow the existing three-scenario pattern (optimal/average/worst)
+3. Update command-line argument handling
+4. Add CSV output generation
 
 ### Modifying Ranges
-Update constants in benchmark classes:
+Update constants in `ExtendedBenchmark.java`:
 ```java
-private static final int MAX_POLICIES = 1000;
-private static final int POLICY_STEP = 100;
+// In generateRange() calls
+int[] policyCounts = generateRange(1, 200, 20);     // Policies: 1-200, step 20
+int[] attributeCounts = generateRange(1, 50, 5);    // Attributes: 1-50, step 5
+int[] exchangeCounts = generateRange(1, 20, 2);     // Exchanges: 1-20, step 2
 ```
 
 ### Custom Scenarios
-Create specialized benchmark methods for:
+Extend `ExtendedBenchmark.java` with specialized methods for:
 - Complex policy combinations
-- Real-world scenario simulation
+- Real-world scenario simulation (like courier examples)
 - Stress testing edge cases
+- Memory usage analysis
 
 ## Troubleshooting
 

@@ -29,3 +29,7 @@ node_modules
 
 # benchmarks
 *.csv
+analyze_benchmarks.py
+analyze_benchmarks.R
+*_benchmark.csv
+*.png
