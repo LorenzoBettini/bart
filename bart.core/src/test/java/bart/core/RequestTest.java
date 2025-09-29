@@ -1,7 +1,7 @@
 package bart.core;
 
-import static bart.core.Participants.allSuchThat;
-import static bart.core.Participants.anySuchThat;
+import static bart.core.Participants.all;
+import static bart.core.Participants.any;
 import static bart.core.Participants.index;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -79,7 +79,7 @@ class RequestTest {
 			new Attributes()
 				.add("aName", "aValue")
 				.add("aName1", "aValue1"),
-			anySuchThat(new Attributes()
+			any(new Attributes()
 				.add("firstName", "Bob"))
 		);
 		var r2 = new Request(
@@ -87,14 +87,14 @@ class RequestTest {
 			new Attributes()
 				.add("aName", "aValue")
 				.add("aName1", "aValue1"),
-			anySuchThat(new Attributes()
+			any(new Attributes()
 				.add("firstName", "Bob"))
 		);
 		var r3 = new Request(
 			index(1),
 			new Attributes()
 				.add("aName", "aValue"),
-			allSuchThat(new Attributes()
+			all(new Attributes()
 				.add("firstName", "Bob"))
 		);
 		assertThat(r1)
