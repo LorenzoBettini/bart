@@ -1,6 +1,6 @@
 package bart.core.examples;
 
-import static bart.core.Participants.anySuchThat;
+import static bart.core.Participants.any;
 import static bart.core.Participants.index;
 import static bart.core.Participants.me;
 import static bart.core.Participants.requester;
@@ -82,7 +82,7 @@ class CouriersExampleTest {
 				new Attributes()
 					.add("type", "addrInfo")
 					.add("city", "Prato"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("service", "delivery")
 					.add("company", "FastAndFurious"))
 			),
@@ -179,7 +179,7 @@ class CouriersExampleTest {
 				new Attributes()
 					.add("type", "addrInfo")
 					.add("city", "Prato"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("service", "delivery")
 					.add("company", "FastAndFurious"))
 			),
@@ -264,7 +264,7 @@ class CouriersExampleTest {
 								new Attributes()
 									.add("type", "addrInfo")
 									.add("city", "Lucca"),
-								anySuchThat(new Attributes()
+								any(new Attributes()
 									.add("service", "delivery")
 									.add("company", "RabbitService"))),
 							new SingleExchange(
@@ -272,7 +272,7 @@ class CouriersExampleTest {
 								new Attributes()
 									.add("type", "addrInfo")
 									.add("city", "Grosseto"),
-								anySuchThat(new Attributes()
+								any(new Attributes()
 										.add("service", "delivery")
 										.add("company", "RabbitService")))
 						)
@@ -295,7 +295,7 @@ class CouriersExampleTest {
 				new Attributes()
 					.add("type", "addrInfo")
 					.add("city", "Prato"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("service", "delivery")
 					.add("company", "FastAndFurious"))
 			),
@@ -399,7 +399,7 @@ class CouriersExampleTest {
 							new Attributes()
 								.add("type", "addrInfo")
 								.add("city", "Pisa"),
-							anySuchThat(new Attributes()
+							any(new Attributes()
 									.add("service", "delivery")
 									.add("company", "RabbitService")))
 						))
@@ -420,7 +420,7 @@ class CouriersExampleTest {
 							.add("type", "addrInfo")
 							.add("city", "Pisa"),
 						new SingleExchange(
-							anySuchThat(new Attributes()
+							any(new Attributes()
 									.add("service", "delivery")
 									.add("company", "RabbitService")),
 							new Attributes()
@@ -446,7 +446,7 @@ class CouriersExampleTest {
 				new Attributes()
 					.add("type", "addrInfo")
 					.add("city", "Prato"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("service", "delivery")
 					.add("company", "FastAndFurious"))
 			),

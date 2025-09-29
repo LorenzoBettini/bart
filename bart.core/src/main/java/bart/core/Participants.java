@@ -37,11 +37,11 @@ public class Participants {
 		return REQUESTER;
 	}
 
-	public static QuantifiedParticipant anySuchThat(Attributes attributes) {
+	public static QuantifiedParticipant any(Attributes attributes) {
 		return new QuantifiedParticipant(Quantifier.ANY, attributes);
 	}
 
-	public static QuantifiedParticipant allSuchThat(Attributes attributes) {
+	public static QuantifiedParticipant all(Attributes attributes) {
 		return new QuantifiedParticipant(Quantifier.ALL, attributes);
 	}
 

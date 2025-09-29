@@ -1,7 +1,7 @@
 package bart.core.semantics;
 
-import static bart.core.Participants.allSuchThat;
-import static bart.core.Participants.anySuchThat;
+import static bart.core.Participants.all;
+import static bart.core.Participants.any;
 import static bart.core.Participants.index;
 import static bart.core.Participants.me;
 import static bart.core.Participants.requester;
@@ -383,7 +383,7 @@ class SemanticsTest {
 			new Request(
 				index(1), // Alice
 				new Attributes(),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("name", "Bob"))
 			),
 			"""
@@ -406,7 +406,7 @@ class SemanticsTest {
 			new Request(
 				index(1), // Alice
 				new Attributes(),
-				allSuchThat(new Attributes()
+				all(new Attributes()
 					.add("role", "Provider"))
 			),
 			"""
@@ -433,7 +433,7 @@ class SemanticsTest {
 			new Request(
 				index(1), // Alice
 				new Attributes(),
-				allSuchThat(new Attributes()
+				all(new Attributes()
 					.add("name", "Bob"))
 			),
 			"""
@@ -455,7 +455,7 @@ class SemanticsTest {
 			new Request(
 				index(1), // Alice
 				new Attributes(),
-				allSuchThat(new Attributes()
+				all(new Attributes()
 					.add("name", "Carl"))
 			),
 			"""
@@ -505,7 +505,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -586,7 +586,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -616,7 +616,7 @@ class SemanticsTest {
 				index(3), // Carl
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -646,7 +646,7 @@ class SemanticsTest {
 				index(1), // Alice
 				new Attributes()
 					.add("resource/type", "paper"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PaperProvider"))
 			),
 			"""
@@ -745,7 +745,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -775,7 +775,7 @@ class SemanticsTest {
 				index(3), // Carl
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -805,7 +805,7 @@ class SemanticsTest {
 				index(1), // Alice
 				new Attributes()
 					.add("resource/type", "paper"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PaperProvider"))
 			),
 			"""
@@ -902,7 +902,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -933,7 +933,7 @@ class SemanticsTest {
 				index(3), // Carl
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -970,7 +970,7 @@ class SemanticsTest {
 				index(4), // Ed
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1063,7 +1063,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1102,7 +1102,7 @@ class SemanticsTest {
 				index(3), // Carl
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1136,7 +1136,7 @@ class SemanticsTest {
 				index(4), // Ed
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1179,7 +1179,7 @@ class SemanticsTest {
 							me(),
 							new Attributes()
 								.add("paper/color", "green"),
-							anySuchThat(new Attributes()
+							any(new Attributes()
 									.add("role", "PaperProvider")))
 						))))
 		.add(
@@ -1223,7 +1223,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1280,7 +1280,7 @@ class SemanticsTest {
 							me(),
 							new Attributes()
 								.add("resource/type", "paper"),
-							allSuchThat(new Attributes()
+							all(new Attributes()
 									.add("role", "PaperProvider")))
 						))))
 		.add(
@@ -1324,7 +1324,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1382,7 +1382,7 @@ class SemanticsTest {
 						new Attributes()
 							.add("resource/type", "printer"),
 						new SingleExchange(
-							allSuchThat(new Attributes()
+							all(new Attributes()
 									.add("role", "PrinterProvider")),
 							new Attributes()
 								.add("resource/type", "paper"),
@@ -1420,7 +1420,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1472,7 +1472,7 @@ class SemanticsTest {
 						new Attributes()
 							.add("resource/type", "printer"),
 						new SingleExchange(
-							anySuchThat(new Attributes()
+							any(new Attributes()
 									.add("role", "PrinterProvider")),
 							new Attributes()
 								.add("resource/type", "paper"),
@@ -1510,7 +1510,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1555,7 +1555,7 @@ class SemanticsTest {
 						new Attributes()
 							.add("resource/type", "printer"),
 						new SingleExchange(
-							anySuchThat(new Attributes()
+							any(new Attributes()
 									.add("role", "InkProvider")),
 							new Attributes()
 								.add("resource/type", "paper"),
@@ -1577,7 +1577,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1615,7 +1615,7 @@ class SemanticsTest {
 							me(),
 							new Attributes()
 								.add("resource/type", "paper"),
-							anySuchThat(new Attributes()
+							any(new Attributes()
 									.add("role", "InkProvider")))
 						))))
 		.add(
@@ -1634,7 +1634,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1670,7 +1670,7 @@ class SemanticsTest {
 							me(),
 							new Attributes()
 								.add("resource/type", "paper"),
-							anySuchThat(new Attributes()
+							any(new Attributes()
 								.add("role", "PrinterProvider")))
 						))))
 		.add(
@@ -1689,7 +1689,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1721,11 +1721,11 @@ class SemanticsTest {
 						new Attributes()
 							.add("resource/type", "printer"),
 						new SingleExchange(
-							allSuchThat(new Attributes()
+							all(new Attributes()
 									.add("role", "PrinterProvider")),
 							new Attributes()
 								.add("resource/type", "paper"),
-							allSuchThat(new Attributes()
+							all(new Attributes()
 								.add("role", "PrinterProvider")))
 						))))
 		.add(
@@ -1744,7 +1744,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1779,11 +1779,11 @@ class SemanticsTest {
 						new Attributes()
 							.add("resource/type", "printer"),
 						new SingleExchange(
-							anySuchThat(new Attributes()
+							any(new Attributes()
 									.add("role", "PrinterProvider")),
 							new Attributes()
 								.add("resource/type", "paper"),
-							anySuchThat(new Attributes()
+							any(new Attributes()
 								.add("role", "PrinterProvider")))
 						))))
 		.add(
@@ -1802,7 +1802,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
@@ -1838,11 +1838,11 @@ class SemanticsTest {
 						new Attributes()
 							.add("resource/type", "printer"),
 						new SingleExchange(
-							allSuchThat(new Attributes()
+							all(new Attributes()
 									.add("role", "PrinterProvider")),
 							new Attributes()
 								.add("resource/type", "paper"),
-							allSuchThat(new Attributes()
+							all(new Attributes()
 									.add("role", "PaperProvider")))
 						))))
 		.add(
@@ -1877,7 +1877,7 @@ class SemanticsTest {
 				index(2), // Bob
 				new Attributes()
 					.add("resource/type", "printer"),
-				anySuchThat(new Attributes()
+				any(new Attributes()
 					.add("role", "PrinterProvider"))
 			),
 			"""
