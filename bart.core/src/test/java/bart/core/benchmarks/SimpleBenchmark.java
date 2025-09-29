@@ -1,6 +1,6 @@
 package bart.core.benchmarks;
 
-import static bart.core.Participants.anySuchThat;
+import static bart.core.Participants.any;
 import static bart.core.Participants.index;
 import static bart.core.Participants.me;
 import static bart.core.Participants.requester;
@@ -388,7 +388,7 @@ public class SimpleBenchmark {
 			new Attributes()
 				.add("resource", resourceValue)
 				.add("scope", "public"),  // Match the policy resource attributes
-			anySuchThat(new Attributes().add("type", "service"))
+			any(new Attributes().add("type", "service"))
 		);
 	}
 	
@@ -407,7 +407,7 @@ public class SimpleBenchmark {
 		return new Request(
 			index(999),
 			requestAttrs,
-			anySuchThat(new Attributes().add("type", "service"))
+			any(new Attributes().add("type", "service"))
 		);
 	}
 	
