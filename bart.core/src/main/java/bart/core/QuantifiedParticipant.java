@@ -37,7 +37,7 @@ public class QuantifiedParticipant implements RequestFromParticipant, ExchangeTo
 	@Override
 	public String toString() {
 		return String.format("%s: %s",
-			(quantifier == Quantifier.ANY ? "anySuchThat" : "allSuchThat"),
+			(quantifier == Quantifier.ANY ? "any" : "all"),
 			attributes
 		);
 	}

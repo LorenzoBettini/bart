@@ -87,7 +87,7 @@ class CouriersExampleTest {
 					.add("company", "FastAndFurious"))
 			),
 			"""
-			evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=anySuchThat: [(service : delivery), (company : FastAndFurious)]]
+			evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=any: [(service : delivery), (company : FastAndFurious)]]
 			  finding matching policies
 			    policy 2: from match([(service : delivery), (company : FastAndFurious)], [(service : delivery), (company : FastAndFurious)]) -> true
 			  policy 2: evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=2]
@@ -184,7 +184,7 @@ class CouriersExampleTest {
 					.add("company", "FastAndFurious"))
 			),
 			"""
-			evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=anySuchThat: [(service : delivery), (company : FastAndFurious)]]
+			evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=any: [(service : delivery), (company : FastAndFurious)]]
 			  finding matching policies
 			    policy 2: from match([(service : delivery), (company : FastAndFurious)], [(service : delivery), (company : FastAndFurious)]) -> true
 			  policy 2: evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=2]
@@ -300,15 +300,15 @@ class CouriersExampleTest {
 					.add("company", "FastAndFurious"))
 			),
 			"""
-			evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=anySuchThat: [(service : delivery), (company : FastAndFurious)]]
+			evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=any: [(service : delivery), (company : FastAndFurious)]]
 			  finding matching policies
 			    policy 2: from match([(service : delivery), (company : FastAndFurious)], [(service : delivery), (company : FastAndFurious)]) -> true
 			    policy 3: from match([(service : delivery), (company : FastAndFurious)], [(service : delivery), (company : RabbitService)]) -> false
 			  policy 2: evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=2]
 			    rule 2.1: resource match([(type : addrInfo), (city : Prato)], [(type : addrInfo), (city : Prato)]) -> true
 			    rule 2.1: condition true -> true
-			    rule 2.1: evaluating AND(Exchange[to=ME, resource=[(type : addrInfo), (city : Lucca)], from=anySuchThat: [(service : delivery), (company : RabbitService)]], Exchange[to=ME, resource=[(type : addrInfo), (city : Grosseto)], from=anySuchThat: [(service : delivery), (company : RabbitService)]])
-			      rule 2.1: evaluating Exchange[to=ME, resource=[(type : addrInfo), (city : Lucca)], from=anySuchThat: [(service : delivery), (company : RabbitService)]]
+			    rule 2.1: evaluating AND(Exchange[to=ME, resource=[(type : addrInfo), (city : Lucca)], from=any: [(service : delivery), (company : RabbitService)]], Exchange[to=ME, resource=[(type : addrInfo), (city : Grosseto)], from=any: [(service : delivery), (company : RabbitService)]])
+			      rule 2.1: evaluating Exchange[to=ME, resource=[(type : addrInfo), (city : Lucca)], from=any: [(service : delivery), (company : RabbitService)]]
 			      policy 1: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : RabbitService)]) -> true
 			      policy 2: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : FastAndFurious)]) -> false
 			      policy 3: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : RabbitService)]) -> true
@@ -323,7 +323,7 @@ class CouriersExampleTest {
 			          rule 1.2: compliant request found Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=2]
 			      result: true
 			    rule 2.1: AND
-			      rule 2.1: evaluating Exchange[to=ME, resource=[(type : addrInfo), (city : Grosseto)], from=anySuchThat: [(service : delivery), (company : RabbitService)]]
+			      rule 2.1: evaluating Exchange[to=ME, resource=[(type : addrInfo), (city : Grosseto)], from=any: [(service : delivery), (company : RabbitService)]]
 			      policy 1: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : RabbitService)]) -> true
 			      policy 2: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : FastAndFurious)]) -> false
 			      policy 3: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : RabbitService)]) -> true
@@ -451,14 +451,14 @@ class CouriersExampleTest {
 					.add("company", "FastAndFurious"))
 			),
 			"""
-			evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=anySuchThat: [(service : delivery), (company : FastAndFurious)]]
+			evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=any: [(service : delivery), (company : FastAndFurious)]]
 			  finding matching policies
 			    policy 2: from match([(service : delivery), (company : FastAndFurious)], [(service : delivery), (company : FastAndFurious)]) -> true
 			    policy 3: from match([(service : delivery), (company : FastAndFurious)], [(service : delivery), (company : RabbitService)]) -> false
 			  policy 2: evaluating Request[requester=1, resource=[(type : addrInfo), (city : Prato)], from=2]
 			    rule 2.1: resource match([(type : addrInfo), (city : Prato)], [(type : addrInfo), (city : Prato)]) -> true
 			    rule 2.1: condition timeHour > 7 and timeHour < 20 and position = Prato -> true
-			    rule 2.1: evaluating Exchange[to=ME, resource=[(type : addrInfo), (city : Pisa)], from=anySuchThat: [(service : delivery), (company : RabbitService)]]
+			    rule 2.1: evaluating Exchange[to=ME, resource=[(type : addrInfo), (city : Pisa)], from=any: [(service : delivery), (company : RabbitService)]]
 			    policy 1: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : RabbitService)]) -> true
 			    policy 2: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : FastAndFurious)]) -> false
 			    policy 3: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : RabbitService)]) -> true
@@ -474,7 +474,7 @@ class CouriersExampleTest {
 			      policy 3: evaluating Request[requester=2, resource=[(type : addrInfo), (city : Pisa)], from=3]
 			        rule 3.2: resource match([(type : addrInfo), (city : Pisa)], [(type : addrInfo), (city : Pisa)]) -> true
 			        rule 3.2: condition true -> true
-			        rule 3.2: evaluating Exchange[to=anySuchThat: [(service : delivery), (company : RabbitService)], resource=[(type : addrInfo)], from=REQUESTER]
+			        rule 3.2: evaluating Exchange[to=any: [(service : delivery), (company : RabbitService)], resource=[(type : addrInfo)], from=REQUESTER]
 			        policy 1: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : RabbitService)]) -> true
 			        policy 2: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : FastAndFurious)]) -> false
 			        policy 3: from match([(service : delivery), (company : RabbitService)], [(service : delivery), (company : RabbitService)]) -> true
