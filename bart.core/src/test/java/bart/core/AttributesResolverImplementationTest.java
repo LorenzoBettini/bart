@@ -320,4 +320,30 @@ class AttributesResolverImplementationTest {
 		Object result = resolver.nameFromParty("resource/type", searchAttributes);
 		assertEquals("printer", result);
 	}
+
+	@Test
+	void testGenericNameWithValidCast() throws UndefinedName {
+		// Test generic name method with valid type casting
+		String resourceType = resolver.name("resource/type", String.class);
+		assertEquals("printer", resourceType);
+		
+		String contextTime = resolver.name("context/time", String.class);
+		assertEquals("morning", contextTime);
+		
+		String partyName = resolver.name("name", String.class);
+		assertEquals("Bob", partyName);
+	}
+
+	@Test
+	void testGenericNameWithInvalidCast() throws UndefinedName {
+		// Test generic name method with invalid type casting
+		// Should throw ClassCastException when trying to cast string to integer
+		assertThatThrownBy(() -> resolver.name("resource/type", Integer.class))
+			.isInstanceOf(ClassCastException.class);
+		
+		// Should throw UndefinedName for non-existent attribute
+		assertThatThrownBy(() -> resolver.name("nonexistent", String.class))
+			.isInstanceOf(UndefinedName.class)
+			.hasMessage("Undefined name: nonexistent");
+	}
 }
