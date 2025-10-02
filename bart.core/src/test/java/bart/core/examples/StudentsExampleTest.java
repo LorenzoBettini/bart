@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,7 @@ class StudentsExampleTest {
 							.add("course", "programming")
 							.add("year", "24/25"),
 						new ExpressionWithDescription(
-							c -> ((List<?>) c.name("friends")).contains(c.nameFromRequester("username")),
+							c -> c.name("friends", Collection.class).contains(c.nameFromRequester("username")),
 							"requester.username in friends"
 						)
 					))))
