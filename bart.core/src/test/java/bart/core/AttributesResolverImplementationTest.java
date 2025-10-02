@@ -335,7 +335,7 @@ class AttributesResolverImplementationTest {
 	}
 
 	@Test
-	void testGenericNameWithInvalidCast() throws UndefinedName {
+	void testGenericNameWithInvalidCast() {
 		// Test generic name method with invalid type casting
 		// Should throw ClassCastException when trying to cast string to integer
 		assertThatThrownBy(() -> resolver.name("resource/type", Integer.class))
