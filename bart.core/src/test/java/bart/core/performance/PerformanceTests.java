@@ -45,20 +45,21 @@ public class PerformanceTests {
 	
 	// Measurement Ranges and Steps
 	// Using larger steps to see clearer performance differences
-	private static final int POLICIES_MIN = 100;
+	// Sequences: Policies 100,1000,...,10000; Attributes 10,100,...,1000; Exchanges 1,10,...,100
+	private static final int POLICIES_MIN = 1000;
 	private static final int POLICIES_MAX = 10000;
 	private static final int POLICIES_STEP = 1000;
 	
-	private static final int ATTRIBUTES_MIN = 10;
+	private static final int ATTRIBUTES_MIN = 100;
 	private static final int ATTRIBUTES_MAX = 1000;
 	private static final int ATTRIBUTES_STEP = 100;
 	
-	private static final int EXCHANGES_MIN = 1;
+	private static final int EXCHANGES_MIN = 10;
 	private static final int EXCHANGES_MAX = 100;
 	private static final int EXCHANGES_STEP = 10;
 	
 	// Repetitions and Warm-up
-	private static final int REPETITIONS = 200;  // More repetitions for statistical significance
+	private static final int REPETITIONS = 100;  // More repetitions for statistical significance
 	private static final int WARMUP_ITERATIONS = 20;
 	
 	// ==================== MAIN METHOD ====================
@@ -116,37 +117,45 @@ public class PerformanceTests {
 		System.out.println("Configuration:");
 		System.out.println("  - Attributes per party: " + BASELINE_NUM_ATTRIBUTES + " (constant)");
 		System.out.println("  - Exchanges per rule: " + BASELINE_NUM_EXCHANGES + " (constant)");
-		System.out.println("  - Policies range: " + POLICIES_MIN + " to " + POLICIES_MAX + " (step: " + POLICIES_STEP + ")");
+		System.out.println("  - Policies sequence: 100, " + POLICIES_MIN + " to " + POLICIES_MAX + " (step: " + POLICIES_STEP + ")");
 		System.out.println("  - Repetitions: " + REPETITIONS);
 		System.out.println();
 		
 		printTableHeader();
 		
+		// Measure with 100 policies first
+		measureSinglePolicyCount(100);
+		
+		// Then measure from POLICIES_MIN to POLICIES_MAX
 		for (int numPolicies = POLICIES_MIN; numPolicies <= POLICIES_MAX; numPolicies += POLICIES_STEP) {
-			// Create test scenario ONCE outside the measurement loop
-			Policies policies = createPoliciesForPolicyTest(numPolicies, BASELINE_NUM_ATTRIBUTES);
-			Semantics semantics = new Semantics(policies);
-			Request request = createRequestForPolicyTest(numPolicies);
-			
-			// Verify once that the scenario works
-			Result testResult = semantics.evaluate(request);
-			assertTrue(testResult.isPermitted(), "Request should be permitted");
-			
-			List<Long> measurements = new ArrayList<>();
-			
-			// Now measure ONLY the evaluation time
-			for (int rep = 0; rep < REPETITIONS; rep++) {
-				long startTime = System.nanoTime();
-				semantics.evaluate(request);
-				long endTime = System.nanoTime();
-				
-				measurements.add(endTime - startTime);
-			}
-			
-			printStatistics(numPolicies, measurements);
+			measureSinglePolicyCount(numPolicies);
 		}
 		
 		System.out.println("-".repeat(80));
+	}
+	
+	private void measureSinglePolicyCount(int numPolicies) {
+		// Create test scenario ONCE outside the measurement loop
+		Policies policies = createPoliciesForPolicyTest(numPolicies, BASELINE_NUM_ATTRIBUTES);
+		Semantics semantics = new Semantics(policies);
+		Request request = createRequestForPolicyTest(numPolicies);
+		
+		// Verify once that the scenario works
+		Result testResult = semantics.evaluate(request);
+		assertTrue(testResult.isPermitted(), "Request should be permitted");
+		
+		List<Long> measurements = new ArrayList<>();
+		
+		// Now measure ONLY the evaluation time
+		for (int rep = 0; rep < REPETITIONS; rep++) {
+			long startTime = System.nanoTime();
+			semantics.evaluate(request);
+			long endTime = System.nanoTime();
+			
+			measurements.add(endTime - startTime);
+		}
+		
+		printStatistics(numPolicies, measurements);
 	}
 	
 	/**
@@ -232,37 +241,45 @@ public class PerformanceTests {
 		System.out.println("Configuration:");
 		System.out.println("  - Number of policies: " + BASELINE_NUM_POLICIES + " (constant)");
 		System.out.println("  - Exchanges per rule: " + BASELINE_NUM_EXCHANGES + " (constant)");
-		System.out.println("  - Attributes range: " + ATTRIBUTES_MIN + " to " + ATTRIBUTES_MAX + " (step: " + ATTRIBUTES_STEP + ")");
+		System.out.println("  - Attributes sequence: 10, " + ATTRIBUTES_MIN + " to " + ATTRIBUTES_MAX + " (step: " + ATTRIBUTES_STEP + ")");
 		System.out.println("  - Repetitions: " + REPETITIONS);
 		System.out.println();
 		
 		printTableHeader();
 		
+		// Measure with 10 attributes first
+		measureSingleAttributeCount(10);
+		
+		// Then measure from ATTRIBUTES_MIN to ATTRIBUTES_MAX
 		for (int numAttributes = ATTRIBUTES_MIN; numAttributes <= ATTRIBUTES_MAX; numAttributes += ATTRIBUTES_STEP) {
-			// Create test scenario ONCE outside the measurement loop
-			Policies policies = createPoliciesForAttributeTest(BASELINE_NUM_POLICIES, numAttributes);
-			Semantics semantics = new Semantics(policies);
-			Request request = createRequestForAttributeTest(numAttributes);
-			
-			// Verify once that the scenario works
-			Result testResult = semantics.evaluate(request);
-			assertTrue(testResult.isPermitted(), "Request should be permitted");
-			
-			List<Long> measurements = new ArrayList<>();
-			
-			// Now measure ONLY the evaluation time
-			for (int rep = 0; rep < REPETITIONS; rep++) {
-				long startTime = System.nanoTime();
-				semantics.evaluate(request);
-				long endTime = System.nanoTime();
-				
-				measurements.add(endTime - startTime);
-			}
-			
-			printStatistics(numAttributes, measurements);
+			measureSingleAttributeCount(numAttributes);
 		}
 		
 		System.out.println("-".repeat(80));
+	}
+	
+	private void measureSingleAttributeCount(int numAttributes) {
+		// Create test scenario ONCE outside the measurement loop
+		Policies policies = createPoliciesForAttributeTest(BASELINE_NUM_POLICIES, numAttributes);
+		Semantics semantics = new Semantics(policies);
+		Request request = createRequestForAttributeTest(numAttributes);
+		
+		// Verify once that the scenario works
+		Result testResult = semantics.evaluate(request);
+		assertTrue(testResult.isPermitted(), "Request should be permitted");
+		
+		List<Long> measurements = new ArrayList<>();
+		
+		// Now measure ONLY the evaluation time
+		for (int rep = 0; rep < REPETITIONS; rep++) {
+			long startTime = System.nanoTime();
+			semantics.evaluate(request);
+			long endTime = System.nanoTime();
+			
+			measurements.add(endTime - startTime);
+		}
+		
+		printStatistics(numAttributes, measurements);
 	}
 	
 	/**
@@ -354,38 +371,46 @@ public class PerformanceTests {
 		System.out.println("Configuration:");
 		System.out.println("  - Number of policies: " + BASELINE_NUM_POLICIES + " (constant)");
 		System.out.println("  - Attributes per party: " + BASELINE_NUM_ATTRIBUTES + " (constant)");
-		System.out.println("  - Exchanges range: " + EXCHANGES_MIN + " to " + EXCHANGES_MAX + " (step: " + EXCHANGES_STEP + ")");
+		System.out.println("  - Exchanges sequence: 1, " + EXCHANGES_MIN + " to " + EXCHANGES_MAX + " (step: " + EXCHANGES_STEP + ")");
 		System.out.println("  - Exchange type: AND chain");
 		System.out.println("  - Repetitions: " + REPETITIONS);
 		System.out.println();
 		
 		printTableHeader();
 		
+		// Measure with 1 exchange first
+		measureSingleExchangeCount(1);
+		
+		// Then measure from EXCHANGES_MIN to EXCHANGES_MAX
 		for (int numExchanges = EXCHANGES_MIN; numExchanges <= EXCHANGES_MAX; numExchanges += EXCHANGES_STEP) {
-			// Create test scenario ONCE outside the measurement loop
-			Policies policies = createPoliciesForExchangeTest(BASELINE_NUM_POLICIES, numExchanges);
-			Semantics semantics = new Semantics(policies);
-			Request request = createRequestForExchangeTest();
-			
-			// Verify once that the scenario works
-			Result testResult = semantics.evaluate(request);
-			assertTrue(testResult.isPermitted(), "Request should be permitted");
-			
-			List<Long> measurements = new ArrayList<>();
-			
-			// Now measure ONLY the evaluation time
-			for (int rep = 0; rep < REPETITIONS; rep++) {
-				long startTime = System.nanoTime();
-				semantics.evaluate(request);
-				long endTime = System.nanoTime();
-				
-				measurements.add(endTime - startTime);
-			}
-			
-			printStatistics(numExchanges, measurements);
+			measureSingleExchangeCount(numExchanges);
 		}
 		
 		System.out.println("-".repeat(80));
+	}
+	
+	private void measureSingleExchangeCount(int numExchanges) {
+		// Create test scenario ONCE outside the measurement loop
+		Policies policies = createPoliciesForExchangeTest(BASELINE_NUM_POLICIES, numExchanges);
+		Semantics semantics = new Semantics(policies);
+		Request request = createRequestForExchangeTest();
+		
+		// Verify once that the scenario works
+		Result testResult = semantics.evaluate(request);
+		assertTrue(testResult.isPermitted(), "Request should be permitted");
+		
+		List<Long> measurements = new ArrayList<>();
+		
+		// Now measure ONLY the evaluation time
+		for (int rep = 0; rep < REPETITIONS; rep++) {
+			long startTime = System.nanoTime();
+			semantics.evaluate(request);
+			long endTime = System.nanoTime();
+			
+			measurements.add(endTime - startTime);
+		}
+		
+		printStatistics(numExchanges, measurements);
 	}
 	
 	/**

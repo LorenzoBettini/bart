@@ -24,14 +24,16 @@ When measuring one metric, the others are held at these baseline values:
 
 ### Measurement Ranges
 
-- **Number of Policies**: 1 to 1000 (step: 100)
-- **Number of Attributes**: 1 to 100 (step: 10)
-- **Number of Exchanges**: 1 to 100 (step: 10)
+The tests use larger ranges and steps to clearly demonstrate performance characteristics:
+
+- **Number of Policies**: 100, 1000, 2000, ..., 10000 (sequence: 100, then 1000 to 10000 in steps of 1000)
+- **Number of Attributes**: 10, 100, 200, ..., 1000 (sequence: 10, then 100 to 1000 in steps of 100)
+- **Number of Exchanges**: 1, 10, 20, ..., 100 (sequence: 1, then 10 to 100 in steps of 10)
 
 ### Test Parameters
 
-- **Repetitions**: 3 iterations per measurement point
-- **Warm-up**: 10 iterations before measurements begin
+- **Repetitions**: 100 iterations per measurement point for statistical significance
+- **Warm-up**: 20 iterations before measurements begin
 
 All these values can be adjusted by modifying the constants at the top of the `PerformanceTests` class.
 
@@ -87,15 +89,17 @@ Performance Test: Number of Policies
 Configuration:
   - Attributes per party: 5 (constant)
   - Exchanges per rule: 3 (constant)
-  - Policies range: 1 to 1000 (step: 100)
-  - Repetitions: 3
+  - Policies sequence: 100, 1000 to 10000 (step: 1000)
+  - Repetitions: 100
 
 Metric Value    Avg Time (ms)        Min Time (ms)        Max Time (ms)        Std Dev (ms)        
 --------------------------------------------------------------------------------
-1               0.124753             0.095077             0.162621             0.028177            
-101             1.342268             0.936481             1.692381             0.311096            
-201             1.345920             1.306895             1.373961             0.028460            
+100             0.358357             0.157991             2.521214             0.250818            
+1000            1.404059             1.029694             3.616508             0.414532            
+2000            2.258911             1.936461             4.038763             0.502164            
+3000            3.302350             2.886728             7.271459             0.716855            
 ...
+10000           10.507216            9.442787             16.578905            1.638301            
 ```
 
 ## Test Methodology
