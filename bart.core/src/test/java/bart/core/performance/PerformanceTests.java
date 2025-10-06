@@ -44,20 +44,21 @@ public class PerformanceTests {
 	private static final int BASELINE_NUM_EXCHANGES = 3;
 	
 	// Measurement Ranges and Steps
-	private static final int POLICIES_MIN = 1;
-	private static final int POLICIES_MAX = 1000;
-	private static final int POLICIES_STEP = 100;
+	// Using larger steps to see clearer performance differences
+	private static final int POLICIES_MIN = 100;
+	private static final int POLICIES_MAX = 10000;
+	private static final int POLICIES_STEP = 1000;
 	
-	private static final int ATTRIBUTES_MIN = 1;
-	private static final int ATTRIBUTES_MAX = 100;
-	private static final int ATTRIBUTES_STEP = 10;
+	private static final int ATTRIBUTES_MIN = 10;
+	private static final int ATTRIBUTES_MAX = 1000;
+	private static final int ATTRIBUTES_STEP = 100;
 	
 	private static final int EXCHANGES_MIN = 1;
 	private static final int EXCHANGES_MAX = 100;
 	private static final int EXCHANGES_STEP = 10;
 	
 	// Repetitions and Warm-up
-	private static final int REPETITIONS = 100;  // More repetitions for statistical significance
+	private static final int REPETITIONS = 200;  // More repetitions for statistical significance
 	private static final int WARMUP_ITERATIONS = 20;
 	
 	// ==================== MAIN METHOD ====================
