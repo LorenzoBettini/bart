@@ -57,8 +57,8 @@ public class PerformanceTests {
 	private static final int EXCHANGES_STEP = 10;
 	
 	// Repetitions and Warm-up
-	private static final int REPETITIONS = 10;
-	private static final int WARMUP_ITERATIONS = 10;
+	private static final int REPETITIONS = 100;  // More repetitions for statistical significance
+	private static final int WARMUP_ITERATIONS = 20;
 	
 	// ==================== MAIN METHOD ====================
 	
@@ -122,23 +122,22 @@ public class PerformanceTests {
 		printTableHeader();
 		
 		for (int numPolicies = POLICIES_MIN; numPolicies <= POLICIES_MAX; numPolicies += POLICIES_STEP) {
+			// Create test scenario ONCE outside the measurement loop
+			Policies policies = createPoliciesForPolicyTest(numPolicies, BASELINE_NUM_ATTRIBUTES);
+			Semantics semantics = new Semantics(policies);
+			Request request = createRequestForPolicyTest(numPolicies);
+			
+			// Verify once that the scenario works
+			Result testResult = semantics.evaluate(request);
+			assertTrue(testResult.isPermitted(), "Request should be permitted");
+			
 			List<Long> measurements = new ArrayList<>();
 			
+			// Now measure ONLY the evaluation time
 			for (int rep = 0; rep < REPETITIONS; rep++) {
-				// Create policies: only the LAST policy should match the request
-				Policies policies = createPoliciesForPolicyTest(numPolicies, BASELINE_NUM_ATTRIBUTES);
-				Semantics semantics = new Semantics(policies);
-				
-				// Create request that matches only the last policy
-				Request request = createRequestForPolicyTest(numPolicies);
-				
-				// Measure execution time
 				long startTime = System.nanoTime();
-				Result result = semantics.evaluate(request);
+				semantics.evaluate(request);
 				long endTime = System.nanoTime();
-				
-				// Verify the request was permitted
-				assertTrue(result.isPermitted(), "Request should be permitted");
 				
 				measurements.add(endTime - startTime);
 			}
@@ -239,23 +238,22 @@ public class PerformanceTests {
 		printTableHeader();
 		
 		for (int numAttributes = ATTRIBUTES_MIN; numAttributes <= ATTRIBUTES_MAX; numAttributes += ATTRIBUTES_STEP) {
+			// Create test scenario ONCE outside the measurement loop
+			Policies policies = createPoliciesForAttributeTest(BASELINE_NUM_POLICIES, numAttributes);
+			Semantics semantics = new Semantics(policies);
+			Request request = createRequestForAttributeTest(numAttributes);
+			
+			// Verify once that the scenario works
+			Result testResult = semantics.evaluate(request);
+			assertTrue(testResult.isPermitted(), "Request should be permitted");
+			
 			List<Long> measurements = new ArrayList<>();
 			
+			// Now measure ONLY the evaluation time
 			for (int rep = 0; rep < REPETITIONS; rep++) {
-				// Create policies with varying attributes
-				Policies policies = createPoliciesForAttributeTest(BASELINE_NUM_POLICIES, numAttributes);
-				Semantics semantics = new Semantics(policies);
-				
-				// Create request that matches the last policy
-				Request request = createRequestForAttributeTest(numAttributes);
-				
-				// Measure execution time
 				long startTime = System.nanoTime();
-				Result result = semantics.evaluate(request);
+				semantics.evaluate(request);
 				long endTime = System.nanoTime();
-				
-				// Verify the request was permitted
-				assertTrue(result.isPermitted(), "Request should be permitted");
 				
 				measurements.add(endTime - startTime);
 			}
@@ -363,23 +361,22 @@ public class PerformanceTests {
 		printTableHeader();
 		
 		for (int numExchanges = EXCHANGES_MIN; numExchanges <= EXCHANGES_MAX; numExchanges += EXCHANGES_STEP) {
+			// Create test scenario ONCE outside the measurement loop
+			Policies policies = createPoliciesForExchangeTest(BASELINE_NUM_POLICIES, numExchanges);
+			Semantics semantics = new Semantics(policies);
+			Request request = createRequestForExchangeTest();
+			
+			// Verify once that the scenario works
+			Result testResult = semantics.evaluate(request);
+			assertTrue(testResult.isPermitted(), "Request should be permitted");
+			
 			List<Long> measurements = new ArrayList<>();
 			
+			// Now measure ONLY the evaluation time
 			for (int rep = 0; rep < REPETITIONS; rep++) {
-				// Create policies with varying exchanges
-				Policies policies = createPoliciesForExchangeTest(BASELINE_NUM_POLICIES, numExchanges);
-				Semantics semantics = new Semantics(policies);
-				
-				// Create request
-				Request request = createRequestForExchangeTest();
-				
-				// Measure execution time
 				long startTime = System.nanoTime();
-				Result result = semantics.evaluate(request);
+				semantics.evaluate(request);
 				long endTime = System.nanoTime();
-				
-				// Verify the request was permitted
-				assertTrue(result.isPermitted(), "Request should be permitted");
 				
 				measurements.add(endTime - startTime);
 			}
