@@ -45,4 +45,4 @@ jobs:
           distribution: "temurin"
 
       - name: "Build, test, code quality and coverage"
-        run: mvn verify -Pjacoco $SONARGOAL -Dsonar.projectKey=LorenzoBettini_bart
+        run: mvn verify -Pperformance-tests -Pjacoco $SONARGOAL -Dsonar.projectKey=LorenzoBettini_bart
