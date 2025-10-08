@@ -42,7 +42,7 @@
 									<goal>java</goal>
 								</goals>
 								<configuration>
-									<mainClass>bart.core.performance.PerformanceTests</mainClass>
+									<mainClass>bart.core.performance.PerformanceStatistics</mainClass>
 									<classpathScope>test</classpathScope>
 								</configuration>
 							</execution>

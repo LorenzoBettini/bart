@@ -63,7 +63,7 @@ mvn test-compile
 
 # Then run the main class
 java -cp target/test-classes:target/classes:$(mvn dependency:build-classpath -q -Dmdep.outputFile=/dev/stdout) \
-  bart.core.performance.PerformanceTests
+  bart.core.performance.PerformanceStatistics
 ```
 
 ### Option 3: From IDE

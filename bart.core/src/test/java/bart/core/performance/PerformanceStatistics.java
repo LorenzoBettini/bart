@@ -23,7 +23,7 @@ import bart.core.SingleExchange;
 import bart.core.semantics.Semantics;
 
 /**
- * Performance tests for the BART project.
+ * Performance statistics for the BART project.
  * 
  * These tests measure how execution time increases with:
  * - Number of policies
@@ -34,7 +34,7 @@ import bart.core.semantics.Semantics;
  * 
  * @author Lorenzo Bettini
  */
-public class PerformanceTests {
+public class PerformanceStatistics {
 
 	// ==================== CONFIGURATION ====================
 	
@@ -65,7 +65,7 @@ public class PerformanceTests {
 	// ==================== MAIN METHOD ====================
 	
 	public static void main(String[] args) {
-		PerformanceTests tests = new PerformanceTests();
+		PerformanceStatistics tests = new PerformanceStatistics();
 		
 		System.out.println("=".repeat(80));
 		System.out.println("BART Performance Tests");
@@ -101,7 +101,7 @@ public class PerformanceTests {
 			// Create a simple scenario with baseline configuration
 			Policies policies = createPoliciesForPolicyTest(BASELINE_NUM_POLICIES, BASELINE_NUM_ATTRIBUTES);
 			Semantics semantics = new Semantics(policies);
-			Request request = createRequestForPolicyTest(BASELINE_NUM_POLICIES);
+			Request request = createRequestForPolicyTest();
 			
 			// Execute the request
 			semantics.evaluate(request);
@@ -138,7 +138,7 @@ public class PerformanceTests {
 		// Create test scenario ONCE outside the measurement loop
 		Policies policies = createPoliciesForPolicyTest(numPolicies, BASELINE_NUM_ATTRIBUTES);
 		Semantics semantics = new Semantics(policies);
-		Request request = createRequestForPolicyTest(numPolicies);
+		Request request = createRequestForPolicyTest();
 		
 		// Verify once that the scenario works
 		Result testResult = semantics.evaluate(request);
@@ -222,7 +222,7 @@ public class PerformanceTests {
 	/**
 	 * Creates a request that will match only the last policy.
 	 */
-	private Request createRequestForPolicyTest(int numPolicies) {
+	private Request createRequestForPolicyTest() {
 		return new Request(
 			index(1), // Requester (first policy)
 			new Attributes().add("resource/type", "target"),
