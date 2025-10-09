@@ -1,4 +1,1 @@
-*
-!.gitignore
-!.workflows
-!.dependabot.yml
+*.md
