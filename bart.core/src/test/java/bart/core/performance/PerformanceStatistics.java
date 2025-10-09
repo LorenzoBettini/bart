@@ -62,8 +62,6 @@ public class PerformanceStatistics {
 	private static final int REPETITIONS = 100;  // More repetitions for statistical significance
 	private static final int WARMUP_ITERATIONS = 20;
 	
-	// ==================== MAIN METHOD ====================
-	
 	public static void main(String[] args) {
 		PerformanceStatistics tests = new PerformanceStatistics();
 		
@@ -94,8 +92,6 @@ public class PerformanceStatistics {
 		System.out.println("=".repeat(80));
 	}
 	
-	// ==================== WARM-UP ====================
-	
 	private void warmUp() {
 		for (int i = 0; i < WARMUP_ITERATIONS; i++) {
 			// Create a simple scenario with baseline configuration
@@ -107,8 +103,6 @@ public class PerformanceStatistics {
 			semantics.evaluate(request);
 		}
 	}
-	
-	// ==================== TEST: NUMBER OF POLICIES ====================
 	
 	public void testPoliciesPerformance() {
 		System.out.println("-".repeat(80));
@@ -231,8 +225,6 @@ public class PerformanceStatistics {
 				.add("role", "TargetProvider"))
 		);
 	}
-	
-	// ==================== TEST: NUMBER OF ATTRIBUTES ====================
 	
 	public void testAttributesPerformance() {
 		System.out.println("-".repeat(80));
@@ -361,8 +353,6 @@ public class PerformanceStatistics {
 			any(fromAttrs)
 		);
 	}
-	
-	// ==================== TEST: NUMBER OF EXCHANGES ====================
 	
 	public void testExchangesPerformance() {
 		System.out.println("-".repeat(80));
@@ -530,8 +520,6 @@ public class PerformanceStatistics {
 		
 		return current;
 	}
-	
-	// ==================== OUTPUT UTILITIES ====================
 	
 	private void printTableHeader() {
 		System.out.println(String.format("%-15s %-20s %-20s %-20s %-20s",

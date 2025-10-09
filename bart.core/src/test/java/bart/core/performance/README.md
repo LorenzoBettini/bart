@@ -133,7 +133,7 @@ Each measurement includes an assertion to verify that the request was actually p
 
 ## Modifying the Tests
 
-To adjust the test parameters, edit the constants in the `PerformanceTests` class:
+To adjust the test parameters, edit the constants in the `PerformanceStatistics` class:
 
 ```java
 // Baseline Configuration
@@ -142,15 +142,9 @@ private static final int BASELINE_NUM_ATTRIBUTES = 5;
 private static final int BASELINE_NUM_EXCHANGES = 3;
 
 // Measurement Ranges
-private static final int POLICIES_MIN = 1;
-private static final int POLICIES_MAX = 1000;
-private static final int POLICIES_STEP = 100;
+private static final int POLICIES_MIN = 1000;
+private static final int POLICIES_MAX = 10000;
+private static final int POLICIES_STEP = 1000;
 
 // ... etc.
 ```
-
-## Notes
-
-- The performance tests are excluded from regular test runs to avoid slowing down normal development
-- Results may vary based on hardware, JVM version, and system load
-- For more accurate results, consider increasing the repetition count or running with a dedicated benchmarking tool like JMH
