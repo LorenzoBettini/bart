@@ -35,4 +35,4 @@ jobs:
           distribution: "temurin"
 
       - name: "Build, test"
-        run: mvn verify
+        run: mvn verify -Pperformance-tests
