@@ -35,7 +35,7 @@ The tests use larger ranges and steps to clearly demonstrate performance charact
 - **Repetitions**: 100 iterations per measurement point for statistical significance
 - **Warm-up**: 20 iterations before measurements begin
 
-All these values can be adjusted by modifying the constants at the top of the `PerformanceTests` class.
+All these values can be adjusted by modifying the constants at the top of the `PerformanceStatistics` class.
 
 ## Running the Tests
 
@@ -68,7 +68,7 @@ java -cp target/test-classes:target/classes:$(mvn dependency:build-classpath -q 
 
 ### Option 3: From IDE
 
-The `PerformanceTests` class has a `main()` method, so you can run it directly from your IDE like any other Java application.
+The `PerformanceStatistics` class has a `main()` method, so you can run it directly from your IDE like any other Java application.
 
 ## Output Format
 
