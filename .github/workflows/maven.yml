@@ -30,7 +30,7 @@ jobs:
           echo "SONARGOAL=sonar:sonar" >> $GITHUB_ENV
         if: ${{ env.SONAR_TOKEN }}
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
