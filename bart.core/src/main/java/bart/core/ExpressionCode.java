@@ -5,5 +5,5 @@ package bart.core;
  */
 @FunctionalInterface
 public interface ExpressionCode {
-	boolean evaluate(AttributesResolver context) throws Exception; // NOSONAR
+	boolean evaluate(NameResolver nameResolver) throws Exception; // NOSONAR
 }

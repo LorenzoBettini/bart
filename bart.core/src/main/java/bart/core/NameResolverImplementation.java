@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import bart.core.semantics.UndefinedName;
 
 /**
- * Implementation of the {@link AttributesResolver} interface that resolves
+ * Implementation of the {@link NameResolver} interface that resolves
  * attributes from a request, context handler, and policies.
  * <p>
  * This class provides methods to resolve attribute values by searching in the following order:
@@ -20,7 +20,7 @@ import bart.core.semantics.UndefinedName;
  *
  * @author Lorenzo Bettini
  */
-public final class AttributesResolverImplementation implements AttributesResolver {
+public final class NameResolverImplementation implements NameResolver {
 
 	private Request request;
 	private ContextHandler contextHandler;
@@ -33,7 +33,7 @@ public final class AttributesResolverImplementation implements AttributesResolve
 	 * @param contextHandler the context handler providing per-party attributes
 	 * @param policies the set of policies (indexed from 1)
 	 */
-	public AttributesResolverImplementation(Request request, ContextHandler contextHandler, Policies policies) {
+	public NameResolverImplementation(Request request, ContextHandler contextHandler, Policies policies) {
 		this.request = request;
 		this.contextHandler = contextHandler;
 		this.policies = policies;

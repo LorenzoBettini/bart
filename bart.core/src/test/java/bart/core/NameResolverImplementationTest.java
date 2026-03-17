@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import bart.core.semantics.UndefinedName;
 
-class AttributesResolverImplementationTest {
+class NameResolverImplementationTest {
 
-	private AttributesResolverImplementation resolver;
+	private NameResolverImplementation resolver;
 	private Request request;
 	private ContextHandler contextHandler;
 	private Policies policies;
@@ -59,7 +59,7 @@ class AttributesResolverImplementationTest {
 			.add(policy2);
 
 		// Create resolver - context index determined by request.from().getIndex() (which is 2)
-		resolver = new AttributesResolverImplementation(request, contextHandler, policies);
+		resolver = new NameResolverImplementation(request, contextHandler, policies);
 	}
 
 	@Test
@@ -127,7 +127,7 @@ class AttributesResolverImplementationTest {
 			index(1) // from index 1 - this will be used for both context and party lookup
 		);
 		
-		var resolverForIndex1 = new AttributesResolverImplementation(requestFromIndex1, contextHandler, policies);
+		var resolverForIndex1 = new NameResolverImplementation(requestFromIndex1, contextHandler, policies);
 		
 		// Should access context for index 1 (as specified in request.from())
 		contextHandler.add(1, "policy1/context", "value1");
@@ -173,7 +173,7 @@ class AttributesResolverImplementationTest {
 		
 		var emptyContextHandler = new ContextHandler();
 		
-		var emptyResolver = new AttributesResolverImplementation(
+		var emptyResolver = new NameResolverImplementation(
 			requestWithEmpty, emptyContextHandler, policies);
 		
 		// Should throw UndefinedName when all sources return null
@@ -195,7 +195,7 @@ class AttributesResolverImplementationTest {
 		var emptyPolicies = new Policies()
 			.add(new Policy(new Attributes(), new Rules())); // empty party attributes
 		
-		var emptyResolver = new AttributesResolverImplementation(
+		var emptyResolver = new NameResolverImplementation(
 			emptyRequest, emptyContextHandler, emptyPolicies);
 		
 		// Should throw UndefinedName for any attribute
@@ -214,7 +214,7 @@ class AttributesResolverImplementationTest {
 			index(1) // from index 1
 		);
 		
-		var resolverForIndex1 = new AttributesResolverImplementation(
+		var resolverForIndex1 = new NameResolverImplementation(
 			requestFromIndex1, contextHandler, policies);
 		
 		// Should access policy at index 1 (Alice's policy) for from index 1
@@ -253,7 +253,7 @@ class AttributesResolverImplementationTest {
 			index(2)
 		);
 		
-		var specialResolver = new AttributesResolverImplementation(
+		var specialResolver = new NameResolverImplementation(
 			specialRequest, contextHandler, policies);
 		
 		// Should handle various attribute name formats

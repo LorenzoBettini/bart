@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 import bart.core.AndExchange;
 import bart.core.AttributeMatcher;
 import bart.core.Attributes;
-import bart.core.AttributesResolverImplementation;
+import bart.core.NameResolverImplementation;
 import bart.core.CompositeExchange;
 import bart.core.ContextHandler;
 import bart.core.DefaultRequestComply;
@@ -148,7 +148,7 @@ public class Semantics {
 				return DENIED;
 			}
 			outcome = rule.getCondition().evaluate(
-				new AttributesResolverImplementation(request, contextHandler, policies));
+				new NameResolverImplementation(request, contextHandler, policies));
 			trace.add(String.format("%s: condition %s -> %s", traceForRule(policyIndex, ruleIndex), rule.getCondition(), outcome));
 			if (!outcome) {
 				return DENIED;
