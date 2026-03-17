@@ -15,6 +15,12 @@
 		<junit-jupiter.version>6.0.3</junit-jupiter.version>
 		<assertj.version>3.27.7</assertj.version>
 
+		<!--
+		Disable m2e-apt automatic configuration to avoid generated .classpath entries in Visual Studio Code Maven extension
+		See https://github.com/eclipse-m2e/m2e-core/tree/main/org.eclipse.m2e.apt.ui
+		-->
+		<m2e.apt.activation>disabled</m2e.apt.activation>
+
 		<sonar.organization>lorenzobettini-github</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.coverage.exclusions>
