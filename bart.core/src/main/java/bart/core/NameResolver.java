@@ -8,7 +8,7 @@ import bart.core.semantics.UndefinedName;
 /**
  * @author Lorenzo Bettini
  */
-public interface AttributesResolver {
+public interface NameResolver {
 
 	Object name(String name) throws UndefinedName;
 
