@@ -91,6 +91,22 @@ public final class NameResolverImplementation implements NameResolver {
 	}
 
 	/**
+	 * Resolves the value of the given attribute name for the party specified by {@code request.requester()}
+	 * and casts it to the specified type.
+	 *
+	 * @param <T> the type to cast the result to
+	 * @param name the attribute name to resolve
+	 * @param clazz the class to cast the result to
+	 * @return the resolved attribute value cast to the specified type
+	 * @throws UndefinedName if the attribute cannot be found
+	 * @throws ClassCastException if the resolved value cannot be cast to the specified type
+	 */
+	@Override
+	public <T> T nameFromRequester(String name, Class<T> clazz) throws UndefinedName {
+		return clazz.cast(nameFromRequester(name));
+	}
+
+	/**
 	 * Resolves the value of the given attribute name for the first party whose attributes match the given search attributes.
 	 * <p>
 	 * The search order is: resource attributes, context handler for the first matching party, then party attributes for the first matching party.
@@ -116,6 +132,23 @@ public final class NameResolverImplementation implements NameResolver {
 			fromParty = policyData.policy().party();
 		}
 		return retrieveName(name, fromContext, fromParty);
+	}
+
+	/**
+	 * Resolves the value of the given attribute name for the first party whose attributes match
+	 * the given search attributes and casts it to the specified type.
+	 *
+	 * @param <T> the type to cast the result to
+	 * @param name the attribute name to resolve
+	 * @param attributes the attributes to match against party attributes
+	 * @param clazz the class to cast the result to
+	 * @return the resolved attribute value cast to the specified type
+	 * @throws UndefinedName if the attribute cannot be found in any source
+	 * @throws ClassCastException if the resolved value cannot be cast to the specified type
+	 */
+	@Override
+	public <T> T nameFromParty(String name, Attributes attributes, Class<T> clazz) throws UndefinedName {
+		return clazz.cast(nameFromParty(name, attributes));
 	}
 
 	/**

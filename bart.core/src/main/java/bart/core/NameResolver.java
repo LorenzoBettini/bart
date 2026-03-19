@@ -16,5 +16,9 @@ public interface NameResolver {
 
 	Object nameFromRequester(String name) throws UndefinedName;
 
+	<T> T nameFromRequester(String name, Class<T> clazz) throws UndefinedName;
+
 	Object nameFromParty(String name, Attributes attributes) throws UndefinedName;
+
+	<T> T nameFromParty(String name, Attributes attributes, Class<T> clazz) throws UndefinedName;
 }
