@@ -346,4 +346,52 @@ class NameResolverImplementationTest {
 			.isInstanceOf(UndefinedName.class)
 			.hasMessage("Undefined name: nonexistent");
 	}
+
+	@Test
+	void testNameFromRequesterWithClassValidCast() throws UndefinedName {
+		// nameFromRequester(name, Class) should return the requester-resolved value cast to the class
+		contextHandler.add(1, "test/attribute", "from_requester");
+		String result = resolver.nameFromRequester("test/attribute", String.class);
+		assertEquals("from_requester", result);
+	}
+
+	@Test
+	void testNameFromRequesterWithClassInvalidCast() {
+		// Should throw ClassCastException when cast is not possible
+		assertThatThrownBy(() -> resolver.nameFromRequester("resource/type", Integer.class))
+			.isInstanceOf(ClassCastException.class);
+	}
+
+	@Test
+	void testNameFromRequesterWithClassUndefined() {
+		// Should propagate UndefinedName when attribute is not found
+		assertThatThrownBy(() -> resolver.nameFromRequester("nonexistent", String.class))
+			.isInstanceOf(UndefinedName.class)
+			.hasMessage("Undefined name: nonexistent");
+	}
+
+	@Test
+	void testNameFromPartyWithClassValidCast() throws UndefinedName {
+		// nameFromParty(name, attributes, Class) should return the party-resolved value cast to the class
+		var searchAttributes = new Attributes().add("role", "Admin");
+		String result = resolver.nameFromParty("name", searchAttributes, String.class);
+		assertEquals("Alice", result);
+	}
+
+	@Test
+	void testNameFromPartyWithClassInvalidCast() {
+		// Should throw ClassCastException when cast is not possible
+		var searchAttributes = new Attributes().add("role", "Admin");
+		assertThatThrownBy(() -> resolver.nameFromParty("name", searchAttributes, Integer.class))
+			.isInstanceOf(ClassCastException.class);
+	}
+
+	@Test
+	void testNameFromPartyWithClassUndefined() {
+		// Should propagate UndefinedName when attribute is not found
+		var searchAttributes = new Attributes().add("role", "NonExistent");
+		assertThatThrownBy(() -> resolver.nameFromParty("name", searchAttributes, String.class))
+			.isInstanceOf(UndefinedName.class)
+			.hasMessage("Undefined name: name");
+	}
 }
