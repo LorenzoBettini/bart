@@ -1940,6 +1940,99 @@ class SemanticsTest {
 		);
 	}
 
+	@Test
+	void requestFromIndexZeroResultsInDenied() {
+		// index(0) has getIndex()==0 which is NOT > 0, so it must go to the
+		// else branch (finding matching policies) instead of getByIndex(0)
+		policies.add(
+			new Policy( // index 1
+				new Attributes()
+					.add("name", "Alice"),
+				new Rules()
+					.add(new Rule(
+						new Attributes().add("resource/type", "printer")
+					))));
+
+		// Alice (1) requesting from index(0): Alice is filtered out as requester,
+		// no other policies remain → DENIED
+		assertResultFalse(
+			new Request(
+				index(1),
+				new Attributes().add("resource/type", "printer"),
+				index(0)
+			),
+			"""
+			evaluating Request[requester=1, resource=[(resource/type : printer)], from=0]
+			  finding matching policies
+			result: false
+			"""
+		);
+	}
+
+	@Test
+	void exchangeToAllFails() {
+		// Alice gives printer provided the requester gives paper to ALL printer providers
+		// Ed is a printer provider
+		// Bob has no rule for paper, so when Alice's exchange requests paper
+		// for all PrinterProviders (including Alice herself), Alice cannot get
+		// paper from Bob → exchange fails → DENIED
+		policies.add(
+			new Policy( // index 1
+				new Attributes()
+					.add("name", "Alice")
+					.add("role", "PrinterProvider"),
+				new Rules()
+					.add(new Rule(
+						new Attributes()
+							.add("resource/type", "printer"),
+						new SingleExchange(
+							all(new Attributes()
+									.add("role", "PrinterProvider")),
+							new Attributes()
+								.add("resource/type", "paper"),
+							requester())
+						))))
+		.add(
+			new Policy( // index 2
+				new Attributes()
+					.add("name", "Ed")
+					.add("role", "PrinterProvider"),
+				new Rules()))
+		.add(
+			new Policy( // index 3
+				new Attributes()
+					.add("name", "Bob"),
+				new Rules()));
+
+		// Bob (3) requests printer from any PrinterProvider.
+		// The exchange requires Bob (requester) to give paper to ALL printer providers.
+		// evaluating Request[requester=1, resource=paper, from=3]: Bob (3) has no
+		// paper rule → DENIED → the allMatch over PrinterProviders fails → DENIED
+		assertResultFalse(
+			new Request(
+				index(3),
+				new Attributes().add("resource/type", "printer"),
+				any(new Attributes().add("role", "PrinterProvider"))
+			),
+			"""
+			evaluating Request[requester=3, resource=[(resource/type : printer)], from=any: [(role : PrinterProvider)]]
+			  finding matching policies
+			    policy 1: from match([(role : PrinterProvider)], [(name : Alice), (role : PrinterProvider)]) -> true
+			    policy 2: from match([(role : PrinterProvider)], [(name : Ed), (role : PrinterProvider)]) -> true
+			  policy 1: evaluating Request[requester=3, resource=[(resource/type : printer)], from=1]
+			    rule 1.1: resource match([(resource/type : printer)], [(resource/type : printer)]) -> true
+			    rule 1.1: condition true -> true
+			    rule 1.1: evaluating Exchange[to=all: [(role : PrinterProvider)], resource=[(resource/type : paper)], from=REQUESTER]
+			    policy 1: from match([(role : PrinterProvider)], [(name : Alice), (role : PrinterProvider)]) -> true
+			    policy 2: from match([(role : PrinterProvider)], [(name : Ed), (role : PrinterProvider)]) -> true
+			    policy 3: from match([(role : PrinterProvider)], [(name : Bob)]) -> false
+			    evaluating Request[requester=1, resource=[(resource/type : paper)], from=3]
+			    result: false
+			result: false
+			"""
+		);
+	}
+
 	private void assertPolicies(String expected) {
 		assertEquals(expected, policies.description());
 	}
