@@ -18,6 +18,16 @@ class ContextHandlerTest {
 	}
 
 	@Test
+	void testFluentApi() {
+		var result = contextHandler
+			.add(1, "anAttribute", "aValue")
+			.add(2, "anotherAttribute", () -> "anotherValue");
+		assertThat(result)
+			.isNotNull()
+			.isSameAs(contextHandler);
+	}
+
+	@Test
 	void testWhenEmpty() {
 		var attributes = contextHandler.ofParty(1);
 		assertThat(attributes)

@@ -5,6 +5,7 @@ import static bart.core.Participants.any;
 import static bart.core.Participants.index;
 import static bart.core.Participants.me;
 import static bart.core.Participants.requester;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -39,6 +40,16 @@ class SemanticsTest {
 	void init() {
 		policies = new Policies();
 		semantics = new Semantics(policies);
+	}
+
+	@Test
+	void fluentApi() {
+		var result = semantics
+			.contextHandler(new ContextHandler())
+			.requestComply(null);
+		assertThat(result)
+			.isNotNull()
+			.isSameAs(semantics);
 	}
 
 	@Test
