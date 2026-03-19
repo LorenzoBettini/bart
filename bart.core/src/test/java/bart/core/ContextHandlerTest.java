@@ -3,6 +3,8 @@ package bart.core;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,5 +32,15 @@ class ContextHandlerTest {
 		var attributes = contextHandler.ofParty(1);
 		assertEquals("aValue2", attributes.name("anAttribute2"));
 		assertEquals("aValue1", attributes.name("anAttribute1"));
+	}
+
+	@Test
+	void testAddSupplier() {
+		var counter = new AtomicInteger(0);
+		contextHandler.add(1, "dynamic", counter::incrementAndGet);
+		var attributes = contextHandler.ofParty(1);
+		// value is re-computed on each call
+		assertEquals(1, attributes.name("dynamic"));
+		assertEquals(2, attributes.name("dynamic"));
 	}
 }
