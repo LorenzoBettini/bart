@@ -4,11 +4,12 @@ This package contains performance tests for the BART project to measure how exec
 
 ## Overview
 
-The performance tests measure the impact of three key metrics on evaluation time:
+The performance tests measure the impact of four key metrics on evaluation time:
 
 1. **Number of Policies** - How execution time scales with the number of policies in the system
 2. **Number of Attributes** - How attribute count affects matching and evaluation performance
-3. **Number of Exchanges** - How the complexity of exchange chains impacts performance
+3. **Number of Exchanges** - How the width of AND exchange chains impacts performance
+4. **Exchange Chain Depth** - How the depth of recursive exchange chains impacts performance
 
 Each metric is tested independently while keeping other factors constant.
 
@@ -29,6 +30,7 @@ The tests use larger ranges and steps to clearly demonstrate performance charact
 - **Number of Policies**: 100, 1000, 2000, ..., 10000 (sequence: 100, then 1000 to 10000 in steps of 1000)
 - **Number of Attributes**: 10, 100, 200, ..., 1000 (sequence: 10, then 100 to 1000 in steps of 100)
 - **Number of Exchanges**: 1, 10, 20, ..., 100 (sequence: 1, then 10 to 100 in steps of 10)
+- **Exchange Chain Depth**: 2, 10, 20, ..., 100 (sequence: 2, then 10 to 100 in steps of 10)
 
 ### Test Parameters
 
@@ -125,7 +127,14 @@ For each metric test:
 3. **Exchange Count Test**:
    - Creates AND chains of exchanges of varying length
    - All exchanges can be satisfied by the requester's policy
-   - Measures the overhead of exchange evaluation
+   - Measures the overhead of exchange evaluation (width)
+
+4. **Exchange Chain Depth Test**:
+   - Creates a chain of N policies where each policy's exchange references the next policy
+   - Party 1 (requester) requests a resource from Party 2
+   - Party 2's exchange requires a resource from Party 3, Party 3's from Party 4, and so on
+   - The last party's exchange is satisfied by a rule of Party 1, closing the chain
+   - Measures the overhead of recursive exchange evaluation (depth)
 
 ### Verification
 

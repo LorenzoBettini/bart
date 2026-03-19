@@ -28,7 +28,8 @@ import bart.core.semantics.Semantics;
  * These tests measure how execution time increases with:
  * - Number of policies
  * - Number of attributes
- * - Number of exchanges
+ * - Number of exchanges (AND chain width)
+ * - Depth of exchange chains (recursive depth)
  * 
  * Each metric is measured independently with other factors held constant.
  * 
@@ -58,6 +59,10 @@ public class PerformanceStatistics {
 	private static final int EXCHANGES_MAX = 100;
 	private static final int EXCHANGES_STEP = 10;
 	
+	private static final int EXCHANGE_DEPTH_MIN = 10;
+	private static final int EXCHANGE_DEPTH_MAX = 100;
+	private static final int EXCHANGE_DEPTH_STEP = 10;
+	
 	// Repetitions and Warm-up
 	private static final int REPETITIONS = 100;  // More repetitions for statistical significance
 	private static final int WARMUP_ITERATIONS = 20;
@@ -85,6 +90,9 @@ public class PerformanceStatistics {
 		System.out.println();
 		
 		tests.testExchangesPerformance();
+		System.out.println();
+		
+		tests.testExchangeDepthPerformance();
 		System.out.println();
 		
 		System.out.println("=".repeat(80));
@@ -482,6 +490,113 @@ public class PerformanceStatistics {
 			any(new Attributes()
 				.add("name", "MatchingParty")
 				.add("role", "TargetProvider"))
+		);
+	}
+	
+	public void testExchangeDepthPerformance() {
+		System.out.println("-".repeat(80));
+		System.out.println("Performance Test: Exchange Chain Depth");
+		System.out.println("-".repeat(80));
+		System.out.println("Configuration:");
+		System.out.println("  - Policies (chain depth) sequence: 2, " + EXCHANGE_DEPTH_MIN + " to " + EXCHANGE_DEPTH_MAX + " (step: " + EXCHANGE_DEPTH_STEP + ")");
+		System.out.println("  - Each policy's exchange references the next policy in the chain");
+		System.out.println("  - Repetitions: " + REPETITIONS);
+		System.out.println();
+		
+		printTableHeader();
+		
+		// Measure with 2 policies first (minimum depth: 1 exchange level)
+		measureSingleExchangeDepth(2);
+		
+		// Then measure from EXCHANGE_DEPTH_MIN to EXCHANGE_DEPTH_MAX
+		for (int numPolicies = EXCHANGE_DEPTH_MIN; numPolicies <= EXCHANGE_DEPTH_MAX; numPolicies += EXCHANGE_DEPTH_STEP) {
+			measureSingleExchangeDepth(numPolicies);
+		}
+		
+		System.out.println("-".repeat(80));
+	}
+	
+	private void measureSingleExchangeDepth(int numPolicies) {
+		// Create test scenario ONCE outside the measurement loop
+		Policies policies = createPoliciesForExchangeDepthTest(numPolicies);
+		Semantics semantics = new Semantics(policies);
+		Request request = createRequestForExchangeDepthTest();
+		
+		// Verify once that the scenario works
+		Result testResult = semantics.evaluate(request);
+		assertTrue(testResult.isPermitted(), "Request should be permitted");
+		
+		List<Long> measurements = new ArrayList<>();
+		
+		// Now measure ONLY the evaluation time
+		for (int rep = 0; rep < REPETITIONS; rep++) {
+			long startTime = System.nanoTime();
+			semantics.evaluate(request);
+			long endTime = System.nanoTime();
+			
+			measurements.add(endTime - startTime);
+		}
+		
+		printStatistics(numPolicies, measurements);
+	}
+	
+	/**
+	 * Creates policies for the exchange depth test.
+	 * <p>
+	 * Party 1 (index 1) is the requester and also closes the chain.
+	 * Party 2 (index 2) matches the initial request with an exchange referencing Party 3.
+	 * Party 3 (index 3) matches the exchange with an exchange referencing Party 4.
+	 * ... and so on until Party N, whose exchange is satisfied by Party 1.
+	 */
+	private Policies createPoliciesForExchangeDepthTest(int numPolicies) {
+		Policies policies = new Policies();
+		
+		// Party 1 (index 1): the requester, with a rule to close the chain
+		Rules requesterRules = new Rules();
+		requesterRules.add(new Rule(
+			new Attributes().add("chain/step", String.valueOf(numPolicies - 1))
+		));
+		policies.add(new Policy(
+			new Attributes().add("party", "1"),
+			requesterRules
+		));
+		
+		// Parties 2 to N: each has a rule with an exchange referencing the next party
+		for (int i = 2; i <= numPolicies; i++) {
+			// The resource this party's rule matches
+			Attributes ruleResource;
+			if (i == 2) {
+				ruleResource = new Attributes().add("resource/type", "target");
+			} else {
+				ruleResource = new Attributes().add("chain/step", String.valueOf(i - 2));
+			}
+			
+			// The exchange: request chain/step=(i-1) from the next party in the chain
+			int nextParty = (i < numPolicies) ? i + 1 : 1;
+			Exchange exchange = new SingleExchange(
+				me(),
+				new Attributes().add("chain/step", String.valueOf(i - 1)),
+				any(new Attributes().add("party", String.valueOf(nextParty)))
+			);
+			
+			policies.add(new Policy(
+				new Attributes().add("party", String.valueOf(i)),
+				new Rules().add(new Rule(ruleResource, exchange))
+			));
+		}
+		
+		return policies;
+	}
+	
+	/**
+	 * Creates a request for the exchange depth test.
+	 * The requester (party 1) asks for "target" from party 2.
+	 */
+	private Request createRequestForExchangeDepthTest() {
+		return new Request(
+			index(1),
+			new Attributes().add("resource/type", "target"),
+			any(new Attributes().add("party", "2"))
 		);
 	}
 	
