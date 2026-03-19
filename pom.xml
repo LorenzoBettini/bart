@@ -15,6 +15,8 @@
 		<junit-jupiter.version>6.0.3</junit-jupiter.version>
 		<assertj.version>3.27.7</assertj.version>
 
+		<pit-timeout-const>4000</pit-timeout-const>
+
 		<!--
 		Disable m2e-apt automatic configuration to avoid generated .classpath entries in Visual Studio Code Maven extension
 		See https://github.com/eclipse-m2e/m2e-core/tree/main/org.eclipse.m2e.apt.ui
@@ -130,6 +132,41 @@
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
 					<version>5.5.0.6356</version>
+				</plugin>
+				<!-- Configure PIT Mutation Testing plugin here since it is invoked explicitly in CI -->
+				<plugin>
+					<groupId>org.pitest</groupId>
+					<artifactId>pitest-maven</artifactId>
+					<version>1.23.0</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.pitest</groupId>
+							<artifactId>pitest-junit5-plugin</artifactId>
+							<version>1.2.3</version>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<timeoutConstant>${pit-timeout-const}</timeoutConstant>
+						<!-- enable it when all mutants are killed -->
+						<!--
+						<mutationThreshold>100</mutationThreshold>
+						-->
+						<targetClasses>
+							<param>bart.core.*</param>
+						</targetClasses>
+						<targetTests>
+							<param>bart.core.*</param>
+						</targetTests>
+						<excludedClasses>
+							<param>bart.core.Attributes</param>
+							<param>bart.core.Participant*</param>
+							<param>bart.core.QuantifiedParticipant</param>
+						</excludedClasses>
+						<outputFormats>
+							<param>HTML</param>
+							<param>XML</param>
+						</outputFormats>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
