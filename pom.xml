@@ -147,10 +147,7 @@
 					</dependencies>
 					<configuration>
 						<timeoutConstant>${pit-timeout-const}</timeoutConstant>
-						<!-- enable it when all mutants are killed -->
-						<!--
 						<mutationThreshold>100</mutationThreshold>
-						-->
 						<targetClasses>
 							<param>bart.core.*</param>
 						</targetClasses>
