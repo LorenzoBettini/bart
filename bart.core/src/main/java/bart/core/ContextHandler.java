@@ -5,6 +5,7 @@ package bart.core;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Party indexes are 1-based, so the first party is 1, the second is 2, and so on.
@@ -17,13 +18,30 @@ public class ContextHandler {
 
 	public Attributes ofParty(int partyIndex) {
 		return context.computeIfAbsent(partyIndex,
-				key -> new Attributes());
+				key -> new DynamicAttributes());
 	}
 
 	public ContextHandler add(int partyIndex, String attributeName, Object attributeValue) {
 		ofParty(partyIndex)
 			.add(attributeName, attributeValue);
 		return this;
+	}
+
+	public ContextHandler add(int partyIndex, String attributeName, Supplier<?> attributeValue) {
+		ofParty(partyIndex)
+			.add(attributeName, attributeValue);
+		return this;
+	}
+
+	private static class DynamicAttributes extends Attributes {
+		@Override
+		public Object name(String attributeName) {
+			var value = super.name(attributeName);
+			if (value instanceof Supplier<?> supplier) {
+				return supplier.get();
+			}
+			return value;
+		}
 	}
 
 }
