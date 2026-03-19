@@ -46,3 +46,27 @@ jobs:
 
       - name: "Build, test, code quality and coverage"
         run: mvn verify -Pperformance-tests -Pjacoco $SONARGOAL -Dsonar.projectKey=LorenzoBettini_bart
+
+      - name: Archive Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/target/surefire-reports/'
+        if: failure() 
+      
+      - name: Archive JaCoCo Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: '**/target/site/jacoco/'
+        if: always()
+
+      - name: Run Mutation Testing
+        run: mvn org.pitest:pitest-maven:mutationCoverage -Dpit-timeout-const=1000
+
+      - name: Archive Mutation Testing Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-testing-report
+          path: '**/target/pit-reports/'
+        if: always()
