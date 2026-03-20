@@ -31,7 +31,7 @@ public class StudentsExample {
 		// add environmental information to context handler
 		semantics.contextHandler(new ContextHandler()
 			.add(1, "friends", List.of("ahsley", "david"))
-			.add(2, "friend", List.of("david", "linda", "steven"))
+			.add(2, "friends", List.of("david", "linda", "steven"))
 		);
 
 		policies.add(
@@ -39,7 +39,7 @@ public class StudentsExample {
 				new Attributes()
 					.add("username", "john")
 					.add("studyLevel", "undergraduate")
-					.add("degreeSubject", "cs")
+					.add("degreeProgram", "cs")
 					.add("university", "unifi")
 					.add("enrollment", "2024"),
 				new Rules()
@@ -47,7 +47,7 @@ public class StudentsExample {
 						new Attributes()
 							.add("type", "lectureNotes")
 							.add("course", "programming")
-							.add("teacher", "gosling")
+							.add("teacher", "smith")
 							.add("year", "24/25")
 					))
 					.add(new Rule(
@@ -65,7 +65,7 @@ public class StudentsExample {
 				new Attributes()
 					.add("username", "mary")
 					.add("studyLevel", "undergraduate")
-					.add("degreeSubject", "cs")
+					.add("degreeProgram", "cs")
 					.add("university", "unifi")
 					.add("enrollment", "2023"),
 				new Rules()
@@ -73,7 +73,7 @@ public class StudentsExample {
 						new Attributes()
 							.add("type", "lectureNotes")
 							.add("course", "ads")
-							.add("teacher", "hoare")
+							.add("teacher", "doe")
 							.add("year", "23/24"),
 						new OrExchange(
 							new SingleExchange(
@@ -96,7 +96,7 @@ public class StudentsExample {
 				.add("course", "ads"),
 			any(new Attributes()
 				.add("studyLevel", "undergraduate")
-				.add("degreeSubject", "cs")
+				.add("degreeProgram", "cs")
 				.add("university", "unifi"))
 		);
 

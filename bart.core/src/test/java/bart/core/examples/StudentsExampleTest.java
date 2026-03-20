@@ -39,7 +39,7 @@ class StudentsExampleTest {
 		// add environmental information to context handler
 		semantics.contextHandler(new ContextHandler()
 			.add(1, "friends", List.of("ahsley", "david"))
-			.add(2, "friend", List.of("david", "linda", "steven"))
+			.add(2, "friends", List.of("david", "linda", "steven"))
 		);
 	}
 
@@ -50,7 +50,7 @@ class StudentsExampleTest {
 				new Attributes()
 					.add("username", "john")
 					.add("studyLevel", "undergraduate")
-					.add("degreeSubject", "cs")
+					.add("degreeProgram", "cs")
 					.add("university", "unifi")
 					.add("enrollment", "2024"),
 				new Rules()
@@ -58,7 +58,7 @@ class StudentsExampleTest {
 						new Attributes()
 							.add("type", "lectureNotes")
 							.add("course", "programming")
-							.add("teacher", "gosling")
+							.add("teacher", "smith")
 							.add("year", "24/25")
 					))
 					.add(new Rule(
@@ -76,7 +76,7 @@ class StudentsExampleTest {
 				new Attributes()
 					.add("username", "mary")
 					.add("studyLevel", "undergraduate")
-					.add("degreeSubject", "cs")
+					.add("degreeProgram", "cs")
 					.add("university", "unifi")
 					.add("enrollment", "2023"),
 				new Rules()
@@ -84,7 +84,7 @@ class StudentsExampleTest {
 						new Attributes()
 							.add("type", "lectureNotes")
 							.add("course", "ads")
-							.add("teacher", "hoare")
+							.add("teacher", "doe")
 							.add("year", "23/24"),
 						new OrExchange(
 							new SingleExchange(
@@ -100,29 +100,31 @@ class StudentsExampleTest {
 						)
 					))));
 
+		Request request = new Request(
+			index(1), // John
+			new Attributes()
+				.add("type", "lectureNotes")
+				.add("course", "ads"),
+			any(new Attributes()
+				.add("studyLevel", "undergraduate")
+				.add("degreeProgram", "cs")
+				.add("university", "unifi"))
+		);
+
 		assertResultTrue(
-			new Request(
-				index(1), // John
-				new Attributes()
-					.add("type", "lectureNotes")
-					.add("course", "ads"),
-				any(new Attributes()
-					.add("studyLevel", "undergraduate")
-					.add("degreeSubject", "cs")
-					.add("university", "unifi"))
-			),
+			request,
 			"""
-			evaluating Request[requester=1, resource=[(type : lectureNotes), (course : ads)], from=any: [(studyLevel : undergraduate), (degreeSubject : cs), (university : unifi)]]
+			evaluating Request[requester=1, resource=[(type : lectureNotes), (course : ads)], from=any: [(studyLevel : undergraduate), (degreeProgram : cs), (university : unifi)]]
 			  finding matching policies
-			    policy 2: from match([(studyLevel : undergraduate), (degreeSubject : cs), (university : unifi)], [(username : mary), (studyLevel : undergraduate), (degreeSubject : cs), (university : unifi), (enrollment : 2023)]) -> true
+			    policy 2: from match([(studyLevel : undergraduate), (degreeProgram : cs), (university : unifi)], [(username : mary), (studyLevel : undergraduate), (degreeProgram : cs), (university : unifi), (enrollment : 2023)]) -> true
 			  policy 2: evaluating Request[requester=1, resource=[(type : lectureNotes), (course : ads)], from=2]
-			    rule 2.1: resource match([(type : lectureNotes), (course : ads)], [(type : lectureNotes), (course : ads), (teacher : hoare), (year : 23/24)]) -> true
+			    rule 2.1: resource match([(type : lectureNotes), (course : ads)], [(type : lectureNotes), (course : ads), (teacher : doe), (year : 23/24)]) -> true
 			    rule 2.1: condition true -> true
 			    rule 2.1: evaluating OR(Exchange[to=ME, resource=[(type : exercises)], from=REQUESTER], Exchange[to=ME, resource=[(type : lectureNotes)], from=REQUESTER])
 			      rule 2.1: evaluating Exchange[to=ME, resource=[(type : exercises)], from=REQUESTER]
 			      evaluating Request[requester=2, resource=[(type : exercises)], from=1]
 			        policy 1: evaluating Request[requester=2, resource=[(type : exercises)], from=1]
-			          rule 1.1: resource match([(type : exercises)], [(type : lectureNotes), (course : programming), (teacher : gosling), (year : 24/25)]) -> false
+			          rule 1.1: resource match([(type : exercises)], [(type : lectureNotes), (course : programming), (teacher : smith), (year : 24/25)]) -> false
 			        policy 1: evaluating Request[requester=2, resource=[(type : exercises)], from=1]
 			          rule 1.2: resource match([(type : exercises)], [(type : exercises), (course : programming), (year : 24/25)]) -> true
 			          rule 1.2: condition requester.username in friends -> false
@@ -131,7 +133,7 @@ class StudentsExampleTest {
 			      rule 2.1: evaluating Exchange[to=ME, resource=[(type : lectureNotes)], from=REQUESTER]
 			      evaluating Request[requester=2, resource=[(type : lectureNotes)], from=1]
 			        policy 1: evaluating Request[requester=2, resource=[(type : lectureNotes)], from=1]
-			          rule 1.1: resource match([(type : lectureNotes)], [(type : lectureNotes), (course : programming), (teacher : gosling), (year : 24/25)]) -> true
+			          rule 1.1: resource match([(type : lectureNotes)], [(type : lectureNotes), (course : programming), (teacher : smith), (year : 24/25)]) -> true
 			          rule 1.1: condition true -> true
 			      result: true
 			    rule 2.1: END Exchange -> true
