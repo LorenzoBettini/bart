@@ -1274,7 +1274,7 @@ class SemanticsTest {
 
 	@Test
 	void exchangeFromAll() {
-		// Alice gives printer provided any paper provider gives paper
+		// Alice gives printer provided all paper providers give paper
 		// Bob gives paper
 		// Carl gives paper
 		// Ed gives paper

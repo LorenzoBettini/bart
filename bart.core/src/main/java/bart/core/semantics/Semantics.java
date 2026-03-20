@@ -34,6 +34,53 @@ import bart.core.Rules;
 import bart.core.SingleExchange;
 
 /**
+ * The core evaluation engine of the Bart framework.
+ * <p>
+ * {@code Semantics} evaluates a {@link bart.core.Request} against a set of
+ * {@link bart.core.Policies} and returns a {@link bart.core.Result} indicating
+ * whether the request is permitted, along with the chain of sub-requests that
+ * were satisfied to enable it.
+ * </p>
+ *
+ * <p>The evaluation process:
+ * <ol>
+ *   <li>Find the policy (or policies) that the {@code from} participant maps to.</li>
+ *   <li>For each candidate policy, iterate its rules in order.</li>
+ *   <li>The first rule whose resource pattern and condition both match triggers
+ *       recursive evaluation of the required exchange.</li>
+ *   <li>Exchange evaluation resolves concrete party indexes, generates
+ *       sub-requests, and checks them against already-collected requests
+ *       (using the configured {@link bart.core.RequestComply} predicate) before
+ *       recursing.</li>
+ * </ol>
+ * </p>
+ *
+ * <p>Example:
+ * {@snippet :
+ * var policies = new Policies()
+ *     .add(new Policy(    // index 1 - Alice provides printer in exchange for paper
+ *         new Attributes().add("name", "Alice"),
+ *         new Rules().add(new Rule(
+ *             new Attributes().add("resource/type", "printer"),
+ *             new SingleExchange(Participants.me(),
+ *                 new Attributes().add("resource/type", "paper"),
+ *                 Participants.requester())))))
+ *     .add(new Policy(    // index 2 - Bob provides paper unconditionally
+ *         new Attributes().add("name", "Bob"),
+ *         new Rules().add(new Rule(
+ *             new Attributes().add("resource/type", "paper")))));
+ *
+ * var semantics = new Semantics(policies);
+ * var result = semantics.evaluate(new Request(
+ *     Participants.index(2),   // Bob requests
+ *     new Attributes().add("resource/type", "printer"),
+ *     Participants.index(1))); // from Alice
+ *
+ * System.out.println(result.isPermitted()); // true
+ * System.out.print(semantics.getTrace());   // detailed evaluation trace
+ * }
+ * </p>
+ *
  * @author Lorenzo Bettini
  */
 public class Semantics {
@@ -47,20 +94,52 @@ public class Semantics {
 	private static final ContextHandler EMPTY_CONTEXT_HANDLER = new ContextHandler();
 	private static final Result DENIED = new Result(false);
 
+	/**
+	 * Creates a new {@code Semantics} instance for the given policies.
+	 *
+	 * @param policies the set of participant policies to evaluate against
+	 */
 	public Semantics(Policies policies) {
 		this.policies = policies;
 	}
 
+	/**
+	 * Configures the {@link ContextHandler} used to supply dynamic,
+	 * per-party contextual attributes (e.g. time or location) during evaluation.
+	 *
+	 * @param contextHandler the context handler to use
+	 * @return {@code this} to allow fluent chaining
+	 */
 	public Semantics contextHandler(ContextHandler contextHandler) {
 		this.contextHandler = contextHandler;
 		return this;
 	}
 
+	/**
+	 * Configures a custom {@link RequestComply} predicate that determines whether
+	 * an already-collected request satisfies a newly generated exchange request,
+	 * preventing infinite recursion and redundant evaluations.
+	 *
+	 * @param requestComply the comply predicate to use
+	 * @return {@code this} to allow fluent chaining
+	 */
 	public Semantics requestComply(RequestComply requestComply) {
 		this.requestComply = requestComply;
 		return this;
 	}
 
+	/**
+	 * Evaluates the given request against the configured policies and returns the
+	 * result.
+	 * <p>
+	 * The trace is reset before each top-level call. Use {@link #getTrace()} after
+	 * this method returns to inspect the detailed evaluation log.
+	 * </p>
+	 *
+	 * @param request the resource request to evaluate
+	 * @return a {@link Result} indicating whether the request is permitted and
+	 *         the chain of satisfied sub-requests
+	 */
 	public Result evaluate(Request request) {
 		trace.reset();
 		return evaluate(request, new LinkedHashSet<>());
@@ -331,6 +410,12 @@ public class Semantics {
 		return String.format("rule %d.%d", policyIndex, ruleIndex);
 	}
 
+	/**
+	 * Returns the {@link Trace} that records the step-by-step evaluation log of
+	 * the most recent {@link #evaluate(Request)} call.
+	 *
+	 * @return the evaluation trace; never {@code null}
+	 */
 	public Trace getTrace() {
 		return trace;
 	}
