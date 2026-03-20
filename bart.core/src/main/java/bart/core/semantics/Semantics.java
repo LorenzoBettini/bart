@@ -58,21 +58,25 @@ import bart.core.SingleExchange;
  * <p>Example:
  * {@snippet :
  * var policies = new Policies()
- *     .add(new Policy(
+ *     .add(new Policy(    // index 1 - Alice provides printer in exchange for paper
  *         new Attributes().add("name", "Alice"),
  *         new Rules().add(new Rule(
  *             new Attributes().add("resource/type", "printer"),
  *             new SingleExchange(Participants.me(),
  *                 new Attributes().add("resource/type", "paper"),
- *                 Participants.requester())))));
+ *                 Participants.requester())))))
+ *     .add(new Policy(    // index 2 - Bob provides paper unconditionally
+ *         new Attributes().add("name", "Bob"),
+ *         new Rules().add(new Rule(
+ *             new Attributes().add("resource/type", "paper")))));
  *
  * var semantics = new Semantics(policies);
  * var result = semantics.evaluate(new Request(
- *     Participants.index(2),
+ *     Participants.index(2),   // Bob requests
  *     new Attributes().add("resource/type", "printer"),
- *     Participants.index(1)));
+ *     Participants.index(1))); // from Alice
  *
- * System.out.println(result.isPermitted()); // may be true or false depending on policies
+ * System.out.println(result.isPermitted()); // true
  * System.out.print(semantics.getTrace());   // detailed evaluation trace
  * }
  * </p>
