@@ -8,12 +8,48 @@
 	<packaging>pom</packaging>
 	<name>bart.parent</name>
 
+	<licenses>
+		<license>
+			<name>Eclipse Public License - v 2.0</name>
+			<url>https://www.eclipse.org/legal/epl-2.0/</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Lorenzo Bettini</name>
+			<email>lorenzo.bettini@gmail.com</email>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<organization>DISIA Dipartimento di Statistica, Informatica, Applicazioni</organization>
+			<organizationUrl>https://www.disia.unifi.it/</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<url>git@github.com:LorenzoBettini/bart.git</url>
+		<developerConnection>scm:git:https://github.com/LorenzoBettini/bart.git</developerConnection>
+		<connection>scm:git:git@github.com/LorenzoBettini/bart.git</connection>
+	</scm>
+
+	<issueManagement>
+		<system>Github</system>
+		<url>https://github.com/LorenzoBettini/bart/issues</url>
+	</issueManagement>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<junit-jupiter.version>6.0.3</junit-jupiter.version>
 		<assertj.version>3.27.7</assertj.version>
+
+		<maven.deploy.skip>false</maven.deploy.skip>
+		<maven-javadoc-plugin-version>3.12.0</maven-javadoc-plugin-version>
+		<maven-source-plugin-version>3.4.0</maven-source-plugin-version>
+		<maven-gpg-plugin-version>3.2.8</maven-gpg-plugin-version>
 
 		<pit-timeout-const>4000</pit-timeout-const>
 
@@ -177,6 +213,81 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!-- For deployment:
+		mvn clean deploy -DskipTests -Psonatype-oss-release
+		-->
+		<profile>
+			<id>sonatype-oss-release</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>0.10.0</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+							<skipPublishing>${maven.deploy.skip}</skipPublishing>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>${maven-source-plugin-version}</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>${maven-javadoc-plugin-version}</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<!-- Use the following configuration with Java 8 -->
+								<configuration>
+									<doclint>none</doclint>
+									<failOnError>false</failOnError>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>${maven-gpg-plugin-version}</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<!-- Prevent gpg from using pinentry programs -->
+									<gpgArguments>
+										<arg>--pinentry-mode</arg>
+										<arg>loopback</arg>
+									</gpgArguments>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
