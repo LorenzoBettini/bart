@@ -6,7 +6,10 @@
 	<artifactId>bart.parent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
+
 	<name>bart.parent</name>
+	<url>https://github.com/LorenzoBettini/bart</url>
+	<description>Bart: a Specification Language for Bartering Access to Resources.</description>
 
 	<licenses>
 		<license>
