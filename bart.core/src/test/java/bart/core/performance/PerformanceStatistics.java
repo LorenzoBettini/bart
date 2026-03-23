@@ -56,12 +56,12 @@ public class PerformanceStatistics {
 	private static final int ATTRIBUTES_STEP = 100;
 	
 	private static final int EXCHANGES_MIN = 10;
-	private static final int EXCHANGES_MAX = 100;
-	private static final int EXCHANGES_STEP = 10;
+	private static final int EXCHANGES_MAX = 160;
+	private static final int EXCHANGES_STEP = 15;
 	
 	private static final int EXCHANGE_DEPTH_MIN = 10;
-	private static final int EXCHANGE_DEPTH_MAX = 100;
-	private static final int EXCHANGE_DEPTH_STEP = 10;
+	private static final int EXCHANGE_DEPTH_MAX = 160;
+	private static final int EXCHANGE_DEPTH_STEP = 15;
 	
 	// Repetitions and Warm-up
 	private static final int REPETITIONS = 100;  // More repetitions for statistical significance
