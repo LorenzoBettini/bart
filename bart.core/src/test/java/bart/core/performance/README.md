@@ -4,12 +4,13 @@ This package contains performance tests for the BART project to measure how exec
 
 ## Overview
 
-The performance tests measure the impact of four key metrics on evaluation time:
+The performance tests measure the impact of five key metrics on evaluation time:
 
 1. **Number of Policies** - How execution time scales with the number of policies in the system
 2. **Number of Attributes** - How attribute count affects matching and evaluation performance
 3. **Number of Exchanges** - How the width of AND exchange chains impacts performance
 4. **Exchange Chain Depth** - How the depth of recursive exchange chains impacts performance
+5. **Exponential Tree Depth** - How a binary AND-exchange tree grows exponentially with depth
 
 Each metric is tested independently while keeping other factors constant.
 
@@ -25,19 +26,21 @@ When measuring one metric, the others are held at these baseline values:
 
 ### Measurement Ranges
 
-The tests use larger ranges and steps to clearly demonstrate performance characteristics:
+The tests use these ranges and steps:
 
-- **Number of Policies**: 100, 1000, 2000, ..., 10000 (sequence: 100, then 1000 to 10000 in steps of 1000)
-- **Number of Attributes**: 10, 100, 200, ..., 1000 (sequence: 10, then 100 to 1000 in steps of 100)
-- **Number of Exchanges**: 1, 10, 20, ..., 100 (sequence: 1, then 10 to 100 in steps of 10)
-- **Exchange Chain Depth**: 2, 10, 20, ..., 100 (sequence: 2, then 10 to 100 in steps of 10)
+- **Number of Policies**: 100, then 1000 to 10000 (step 1000)
+- **Number of Attributes**: 10, then 100 to 1000 (step 100)
+- **Number of Exchanges**: 1, then 10 to 160 (step 15)
+- **Exchange Chain Depth**: 2, then 10 to 160 (step 15)
+- **Exponential Tree Depth**: 2, then 3 to 10 (step 1)
 
 ### Test Parameters
 
-- **Repetitions**: 100 iterations per measurement point for statistical significance
+- **Default repetitions**: 100 iterations per measurement point
+- **Exponential tree repetitions**: 3 iterations (temporarily reduced in that scenario to avoid very long runs)
 - **Warm-up**: 20 iterations before measurements begin
 
-All these values can be adjusted by modifying the constants at the top of the `PerformanceStatistics` class.
+All these values can be adjusted by modifying constants and parameters in the `PerformanceStatistics` class.
 
 ## Running the Tests
 
@@ -76,7 +79,7 @@ The `PerformanceStatistics` class has a `main()` method, so you can run it direc
 
 The tests output results in a text-based table format showing:
 
-- **Metric Value**: The value being tested (e.g., number of policies)
+- **Metric Value**: The value being tested (e.g., number of policies or depth)
 - **Avg Time (ms)**: Average execution time across repetitions
 - **Min Time (ms)**: Minimum execution time observed
 - **Max Time (ms)**: Maximum execution time observed
@@ -85,6 +88,15 @@ The tests output results in a text-based table format showing:
 Example output:
 
 ```
+================================================================================
+BART Performance Tests
+================================================================================
+
+Warming up JVM with 20 iterations...
+Warm-up complete.
+
+Running performance tests...
+
 --------------------------------------------------------------------------------
 Performance Test: Number of Policies
 --------------------------------------------------------------------------------
@@ -96,19 +108,27 @@ Configuration:
 
 Metric Value    Avg Time (ms)        Min Time (ms)        Max Time (ms)        Std Dev (ms)        
 --------------------------------------------------------------------------------
-100             0.358357             0.157991             2.521214             0.250818            
-1000            1.404059             1.029694             3.616508             0.414532            
-2000            2.258911             1.936461             4.038763             0.502164            
-3000            3.302350             2.886728             7.271459             0.716855            
+100             1.051263             0.720266             2.334211             0.282896            
+1000            2.513296             1.590188             8.095957             1.438809            
+2000            3.660196             3.134469             6.483130             0.617969            
+3000            5.309066             4.457085             7.918783             0.645742            
+4000            7.149537             6.360736             12.061211            0.733808            
+5000            8.899375             8.161262             10.512052            0.530080            
+6000            10.752564            9.545741             13.097545            0.733166            
+7000            13.175976            11.528444            22.088137            1.496799            
+8000            14.546005            13.627136            17.157248            0.889353            
+9000            18.117213            15.012500            39.342158            4.377790            
+10000           18.585067            17.069912            21.633398            1.057566            
+--------------------------------------------------------------------------------
+
 ...
-10000           10.507216            9.442787             16.578905            1.638301            
 ```
 
 ## Test Methodology
 
 ### JVM Warm-up
 
-The tests perform 10 warm-up iterations before collecting measurements to ensure the JVM is optimized (JIT compilation, class loading, etc.).
+The tests perform 20 warm-up iterations before collecting measurements to ensure the JVM is optimized (JIT compilation, class loading, etc.).
 
 ### Test Scenarios
 
@@ -117,7 +137,7 @@ For each metric test:
 1. **Policy Count Test**:
    - Creates N policies where only the last one matches the request
    - Measures time to evaluate a request that must check all policies before finding the match
-   - Tests worst-case scenario where the matching policy is at the end
+   - Tests a worst-case policy-selection path
 
 2. **Attribute Count Test**:
    - Varies the number of attributes in party definitions
@@ -131,29 +151,43 @@ For each metric test:
 
 4. **Exchange Chain Depth Test**:
    - Creates a chain of N policies where each policy's exchange references the next policy
-   - Party 1 (requester) requests a resource from Party 2
-   - Party 2's exchange requires a resource from Party 3, Party 3's from Party 4, and so on
-   - The last party's exchange is satisfied by a rule of Party 1, closing the chain
+   - The last policy closes the chain back to the requester
    - Measures the overhead of recursive exchange evaluation (depth)
+
+5. **Exponential Tree Depth Test**:
+   - Implements a binary dependency tree
+   - Each internal node requires two subordinate requests through an AND exchange
+   - Leaf nodes grant access unconditionally
+   - The number of evaluation nodes follows $2^{d+1}-1$
+   - Repetitions are reduced to 3 in this scenario to keep execution time reasonable
 
 ### Verification
 
-Each measurement includes an assertion to verify that the request was actually permitted, ensuring the test scenario is valid.
+Each measurement includes an assertion to verify that the request was permitted, ensuring the scenario is valid.
 
 ## Modifying the Tests
 
-To adjust the test parameters, edit the constants in the `PerformanceStatistics` class:
+To adjust test parameters, edit `PerformanceStatistics`:
 
 ```java
-// Baseline Configuration
+// Baseline configuration
 private static final int BASELINE_NUM_POLICIES = 10;
 private static final int BASELINE_NUM_ATTRIBUTES = 5;
 private static final int BASELINE_NUM_EXCHANGES = 3;
 
-// Measurement Ranges
+// Measurement ranges
 private static final int POLICIES_MIN = 1000;
 private static final int POLICIES_MAX = 10000;
 private static final int POLICIES_STEP = 1000;
 
-// ... etc.
+private static final int EXCHANGE_DEPTH_MIN = 10;
+private static final int EXCHANGE_DEPTH_MAX = 160;
+private static final int EXCHANGE_DEPTH_STEP = 15;
+
+private static final int TREE_DEPTH_MIN = 3;
+private static final int TREE_DEPTH_MAX = 10;
+private static final int TREE_DEPTH_STEP = 1;
+
+// Repetitions (used by most scenarios)
+private static int repetitions = 100;
 ```
