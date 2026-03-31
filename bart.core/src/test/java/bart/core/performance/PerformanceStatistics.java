@@ -63,8 +63,12 @@ public class PerformanceStatistics {
 	private static final int EXCHANGE_DEPTH_MAX = 160;
 	private static final int EXCHANGE_DEPTH_STEP = 15;
 	
+	private static final int TREE_DEPTH_MIN = 3;
+	private static final int TREE_DEPTH_MAX = 10;
+	private static final int TREE_DEPTH_STEP = 1;
+	
 	// Repetitions and Warm-up
-	private static final int REPETITIONS = 100;  // More repetitions for statistical significance
+	private static int repetitions = 100;  // More repetitions for statistical significance
 	private static final int WARMUP_ITERATIONS = 20;
 	
 	public static void main(String[] args) {
@@ -95,6 +99,9 @@ public class PerformanceStatistics {
 		tests.testExchangeDepthPerformance();
 		System.out.println();
 		
+		tests.testExponentialTreePerformance();
+		System.out.println();
+		
 		System.out.println("=".repeat(80));
 		System.out.println("Performance tests completed.");
 		System.out.println("=".repeat(80));
@@ -120,7 +127,7 @@ public class PerformanceStatistics {
 		System.out.println("  - Attributes per party: " + BASELINE_NUM_ATTRIBUTES + " (constant)");
 		System.out.println("  - Exchanges per rule: " + BASELINE_NUM_EXCHANGES + " (constant)");
 		System.out.println("  - Policies sequence: 100, " + POLICIES_MIN + " to " + POLICIES_MAX + " (step: " + POLICIES_STEP + ")");
-		System.out.println("  - Repetitions: " + REPETITIONS);
+		System.out.println("  - Repetitions: " + repetitions);
 		System.out.println();
 		
 		printTableHeader();
@@ -149,7 +156,7 @@ public class PerformanceStatistics {
 		List<Long> measurements = new ArrayList<>();
 		
 		// Now measure ONLY the evaluation time
-		for (int rep = 0; rep < REPETITIONS; rep++) {
+		for (int rep = 0; rep < repetitions; rep++) {
 			long startTime = System.nanoTime();
 			semantics.evaluate(request);
 			long endTime = System.nanoTime();
@@ -242,7 +249,7 @@ public class PerformanceStatistics {
 		System.out.println("  - Number of policies: " + BASELINE_NUM_POLICIES + " (constant)");
 		System.out.println("  - Exchanges per rule: " + BASELINE_NUM_EXCHANGES + " (constant)");
 		System.out.println("  - Attributes sequence: 10, " + ATTRIBUTES_MIN + " to " + ATTRIBUTES_MAX + " (step: " + ATTRIBUTES_STEP + ")");
-		System.out.println("  - Repetitions: " + REPETITIONS);
+		System.out.println("  - Repetitions: " + repetitions);
 		System.out.println();
 		
 		printTableHeader();
@@ -271,7 +278,7 @@ public class PerformanceStatistics {
 		List<Long> measurements = new ArrayList<>();
 		
 		// Now measure ONLY the evaluation time
-		for (int rep = 0; rep < REPETITIONS; rep++) {
+		for (int rep = 0; rep < repetitions; rep++) {
 			long startTime = System.nanoTime();
 			semantics.evaluate(request);
 			long endTime = System.nanoTime();
@@ -371,7 +378,7 @@ public class PerformanceStatistics {
 		System.out.println("  - Attributes per party: " + BASELINE_NUM_ATTRIBUTES + " (constant)");
 		System.out.println("  - Exchanges sequence: 1, " + EXCHANGES_MIN + " to " + EXCHANGES_MAX + " (step: " + EXCHANGES_STEP + ")");
 		System.out.println("  - Exchange type: AND chain");
-		System.out.println("  - Repetitions: " + REPETITIONS);
+		System.out.println("  - Repetitions: " + repetitions);
 		System.out.println();
 		
 		printTableHeader();
@@ -400,7 +407,7 @@ public class PerformanceStatistics {
 		List<Long> measurements = new ArrayList<>();
 		
 		// Now measure ONLY the evaluation time
-		for (int rep = 0; rep < REPETITIONS; rep++) {
+		for (int rep = 0; rep < repetitions; rep++) {
 			long startTime = System.nanoTime();
 			semantics.evaluate(request);
 			long endTime = System.nanoTime();
@@ -500,7 +507,7 @@ public class PerformanceStatistics {
 		System.out.println("Configuration:");
 		System.out.println("  - Policies (chain depth) sequence: 2, " + EXCHANGE_DEPTH_MIN + " to " + EXCHANGE_DEPTH_MAX + " (step: " + EXCHANGE_DEPTH_STEP + ")");
 		System.out.println("  - Each policy's exchange references the next policy in the chain");
-		System.out.println("  - Repetitions: " + REPETITIONS);
+		System.out.println("  - Repetitions: " + repetitions);
 		System.out.println();
 		
 		printTableHeader();
@@ -529,7 +536,7 @@ public class PerformanceStatistics {
 		List<Long> measurements = new ArrayList<>();
 		
 		// Now measure ONLY the evaluation time
-		for (int rep = 0; rep < REPETITIONS; rep++) {
+		for (int rep = 0; rep < repetitions; rep++) {
 			long startTime = System.nanoTime();
 			semantics.evaluate(request);
 			long endTime = System.nanoTime();
@@ -597,6 +604,143 @@ public class PerformanceStatistics {
 			index(1),
 			new Attributes().add("resource/type", "target"),
 			any(new Attributes().add("party", "2"))
+		);
+	}
+	
+	public void testExponentialTreePerformance() {
+		var origRepetitions = repetitions;
+		repetitions = 3; // Fewer repetitions for very deep trees to keep test time reasonable
+		System.out.println("-".repeat(80));
+		System.out.println("Performance Test: Exponential Tree Depth (Binary AND-Exchange Tree)");
+		System.out.println("-".repeat(80));
+		System.out.println("Configuration:");
+		System.out.println("  - Each internal policy requires AND exchange with two children");
+		System.out.println("  - Leaf policies grant access unconditionally");
+		System.out.println("  - Total evaluation nodes = 2^(depth+1) - 1");
+		System.out.println("  - Depth sequence: 2, " + TREE_DEPTH_MIN + " to " + TREE_DEPTH_MAX + " (step: " + TREE_DEPTH_STEP + ")");
+		System.out.println("  - Repetitions: " + repetitions);
+		System.out.println();
+		
+		printTableHeader();
+		
+		// Measure with depth 2 first (smallest meaningful binary tree: 7 nodes)
+		measureSingleTreeDepth(2);
+		
+		// Then measure from TREE_DEPTH_MIN to TREE_DEPTH_MAX
+		for (int depth = TREE_DEPTH_MIN; depth <= TREE_DEPTH_MAX; depth += TREE_DEPTH_STEP) {
+			measureSingleTreeDepth(depth);
+		}
+		
+		System.out.println("-".repeat(80));
+		repetitions = origRepetitions; // Restore original repetitions
+	}
+	
+	private void measureSingleTreeDepth(int depth) {
+		// Create test scenario ONCE outside the measurement loop
+		Policies policies = createPoliciesForTreeDepthTest(depth);
+		Semantics semantics = new Semantics(policies);
+		Request request = createRequestForTreeDepthTest();
+		
+		// Verify once that the scenario works
+		Result testResult = semantics.evaluate(request);
+		assertTrue(testResult.isPermitted(), "Request should be permitted");
+		
+		List<Long> measurements = new ArrayList<>();
+		
+		// Now measure ONLY the evaluation time
+		for (int rep = 0; rep < repetitions; rep++) {
+			long startTime = System.nanoTime();
+			semantics.evaluate(request);
+			long endTime = System.nanoTime();
+			
+			measurements.add(endTime - startTime);
+		}
+		
+		printStatistics(depth, measurements);
+	}
+	
+	/**
+	 * Creates policies for the exponential tree depth test.
+	 * <p>
+	 * Policy 1 (index 1) is the requester u.
+	 * For each binary word w of length &lt; depth, policy p_w grants
+	 * resource res_w only if the requester provides both res_{w0}
+	 * (from p_{w0}) and res_{w1} (from p_{w1}) via an AND exchange.
+	 * For each binary word w of length = depth, policy p_w grants
+	 * resource res_w unconditionally (leaf policy).
+	 * <p>
+	 * The total number of policies is 2^(depth+1) - 1 + 1 (including requester).
+	 * The evaluation generates a complete binary tree of depth {@code depth}
+	 * with 2^(depth+1) - 1 request-evaluation nodes.
+	 */
+	private Policies createPoliciesForTreeDepthTest(int depth) {
+		Policies policies = new Policies();
+		
+		// Party 1: the requester u
+		policies.add(new Policy(
+			new Attributes().add("id", "u"),
+			new Rules().add(new Rule())
+		));
+		
+		// Generate all binary words of length 0 to depth using BFS
+		List<String> allWords = new ArrayList<>();
+		allWords.add(""); // root (epsilon)
+		int i = 0;
+		while (i < allWords.size()) {
+			String w = allWords.get(i);
+			if (w.length() < depth) {
+				allWords.add(w + "0");
+				allWords.add(w + "1");
+			}
+			i++;
+		}
+		
+		// Create a policy for each binary word
+		for (String w : allWords) {
+			Attributes partyAttrs = new Attributes().add("id", "p" + w);
+			Attributes resourceAttrs = new Attributes()
+				.add("type", "r")
+				.add("id", w);
+			
+			if (w.length() < depth) {
+				// Internal node: AND exchange requiring both children
+				Exchange exchange = new AndExchange(
+					new SingleExchange(
+						me(),
+						new Attributes().add("type", "r").add("id", w + "0"),
+						any(new Attributes().add("id", "p" + w + "0"))
+					),
+					new SingleExchange(
+						me(),
+						new Attributes().add("type", "r").add("id", w + "1"),
+						any(new Attributes().add("id", "p" + w + "1"))
+					)
+				);
+				policies.add(new Policy(
+					partyAttrs,
+					new Rules().add(new Rule(resourceAttrs, exchange))
+				));
+			} else {
+				// Leaf node: unconditional access
+				policies.add(new Policy(
+					partyAttrs,
+					new Rules().add(new Rule(resourceAttrs))
+				));
+			}
+		}
+		
+		return policies;
+	}
+	
+	/**
+	 * Creates a request for the exponential tree depth test.
+	 * The requester u (index 1) asks for the root resource from the root party.
+	 */
+	private Request createRequestForTreeDepthTest() {
+		return new Request(
+			index(1), // requester u
+			new Attributes().add("type", "r").add("id", ""),
+			any(new Attributes().add("id", "p"))
 		);
 	}
 	
